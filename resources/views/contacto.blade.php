@@ -121,42 +121,58 @@
             Completa el formulario y te responderemos a la brevedad.
         </p>
 
-        {{-- Formulario de Contacto (con ID agregado) --}}
-        <form id="formContacto" action="#" class="text-start mx-auto p-4 shadow-sm rounded"
-            style="max-width: 600px; background-color: #f8f9fa;">
+        {{-- Mensaje de éxito de Laravel --}}
+        @if (session('success'))
+            <div class="alert alert-success text-center mb-4 mx-auto shadow-sm rounded-3" style="max-width: 600px;">
+                <i class="bi bi-check-circle-fill me-2"></i> {{ session('success') }}
+            </div>
+        @endif
 
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label for="nombre" class="form-label text-secondary fw-bold">Nombre</label>
-                    <input type="text" class="form-control" id="nombre" name="nombre" placeholder="Ej. Juan"
-                        required>
+        {{-- CASO 1: SI EL USUARIO ESTÁ LOGUEADO --}}
+        @auth
+            <form id="formContacto" action="/contacto" method="POST" class="text-start mx-auto p-4 shadow-sm rounded"
+                style="max-width: 600px; background-color: #f8f9fa; border-radius: 12px;">
+                @csrf
+
+                {{-- Campo Asunto --}}
+                <div class="mb-3">
+                    <label for="asunto" class="form-label text-secondary fw-bold">Asunto *</label>
+                    <input type="text" class="form-control" id="asunto" name="asunto"
+                        placeholder="Ej. Problema con mi pedido / Duda de envíos" required>
                 </div>
-                <div class="col-md-6 mb-3">
-                    <label for="apellido" class="form-label text-secondary fw-bold">Apellido</label>
-                    <input type="text" class="form-control" id="apellido" name="apellido" placeholder="Ej. Pérez"
-                        required>
+
+                {{-- Campo Mensaje --}}
+                <div class="mb-4">
+                    <label for="mensaje" class="form-label text-secondary fw-bold">Mensaje / Consulta *</label>
+                    <textarea class="form-control" id="mensaje" name="mensaje" rows="5"
+                        placeholder="Escribe detalladamente tu consulta aquí..." required></textarea>
                 </div>
-            </div>
 
-            <div class="mb-3">
-                <label for="mail" class="form-label text-secondary fw-bold">Correo Electrónico</label>
-                <input type="email" class="form-control" id="mail" name="mail" placeholder="tu@email.com"
-                    required>
-            </div>
+                <div class="text-center">
+                    <button type="submit" class="btn btn-lg px-5 py-3 fw-bold text-white shadow w-100"
+                        style="background-color: #FF6600; border-radius: 50px; border: none; transition: 0.3s;">
+                        Enviar Mensaje
+                    </button>
+                </div>
+            </form>
+        @endauth
 
-            <div class="mb-4">
-                <label for="consulta" class="form-label text-secondary fw-bold">Consulta</label>
-                <textarea class="form-control" id="consulta" name="consulta" rows="4"
-                    placeholder="Escribe tu mensaje aquí..." required></textarea>
+        {{-- CASO 2: SI EL USUARIO ES UN INVITADO (NO LOGUEADO) --}}
+        @guest
+            <div class="text-center mx-auto p-5 shadow-sm border"
+                style="max-width: 600px; background-color: #f8f9fa; border-radius: 12px;">
+                <span class="material-symbols-rounded mb-3" style="font-size: 4rem; color: #021A54;">lock_open</span>
+                <h4 class="fw-bold mb-2" style="color: #021A54;">¿Deseas enviarnos un mensaje?</h4>
+                <p class="text-secondary mb-4 mx-auto" style="max-width: 400px;">
+                    Para mantener la seguridad de la tienda y darte una atención personalizada, necesitas iniciar sesión.
+                </p>
+                <a href="/login" class="btn btn-lg px-5 py-2 fw-bold text-white shadow-sm"
+                    style="background-color: #021A54; border-radius: 50px; border: none; transition: 0.3s;">
+                    Iniciar Sesión
+                </a>
             </div>
+        @endguest
 
-            <div class="text-center">
-                <button type="submit" class="btn btn-lg px-5 py-3 fw-bold text-white shadow w-100"
-                    style="background-color: #FF6600; border-radius: 50px; border: none; transition: 0.3s;">
-                    Enviar Mensaje
-                </button>
-            </div>
-        </form>
     </section>
 
     <div class="modal fade" id="modalAgradecimiento" tabindex="-1" aria-labelledby="modalAgradecimientoLabel"
@@ -202,32 +218,6 @@
     {{-- Footer end --}}
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            // Capturamos el formulario y el modal
-            const formulario = document.getElementById("formContacto");
-            const modal = new bootstrap.Modal(document.getElementById("modalAgradecimiento"));
-
-            formulario.addEventListener("submit", function(evento) {
-                // Evitamos que la página se recargue al enviar
-                evento.preventDefault();
-
-                // Obtenemos los valores que el usuario ingresó
-                const nombreIngresado = document.getElementById("nombre").value;
-                const mailIngresado = document.getElementById("mail").value;
-
-                // Inyectamos esos valores en el HTML del modal
-                document.getElementById("modalNombreUsuario").innerText = nombreIngresado;
-                document.getElementById("modalMailUsuario").innerText = mailIngresado;
-
-                // Mostramos el modal
-                modal.show();
-
-                // Opcional: Limpiamos el formulario después de "enviar"
-                formulario.reset();
-            });
-        });
-    </script>
 </body>
 
 </html>

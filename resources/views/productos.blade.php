@@ -56,234 +56,104 @@
                     Todas las categorías
                 </button>
                 <ul class="dropdown-menu dropdown-menu-end shadow">
+                    {{-- Botón fijo para ver todas --}}
                     <li><a class="dropdown-item active" href="#" onclick="filterCategory('all', this)">Todas</a>
                     </li>
-                    <li><a class="dropdown-item" href="#"
-                            onclick="filterCategory('indumentaria', this)">Indumentaria</a></li>
-                    <li><a class="dropdown-item" href="#"
-                            onclick="filterCategory('accesorios', this)">Accesorios</a></li>
-                    <li><a class="dropdown-item" href="#" onclick="filterCategory('libreria', this)">Librería y
-                            Estudio</a></li>
-                    <li><a class="dropdown-item" href="#" onclick="filterCategory('hogar', this)">Hogar y
-                            Utilidad</a></li>
+
+                    {{-- MAGIA DE LARAVEL: Dibujamos las categorías dinámicamente --}}
+                    @foreach ($categorias as $categoria)
+                        @php
+                            // Convertimos el nombre (ej: "Librería y Estudio") a formato filtro ("libreria-y-estudio")
+                            $catSlug = Str::slug($categoria->name);
+                        @endphp
+                        <li>
+                            <a class="dropdown-item" href="#"
+                                onclick="filterCategory('{{ $catSlug }}', this)">
+                                {{ $categoria->name }}
+                            </a>
+                        </li>
+                    @endforeach
                 </ul>
             </div>
         </div>
+        {{-- SISTEMA DE AVISOS (Éxito o Error de Stock) --}}
+        @if (session('success'))
+            <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+                <strong>¡Genial!</strong> {{ session('success') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
 
+        @if (session('error'))
+            <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+                <strong>¡Atención!</strong> {{ session('error') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
         <div class="row g-4" id="products-grid">
 
-            <div class="col-12 col-md-4 col-lg-3 product-card" data-category="indumentaria">
-                <div class="card h-100 border-0 shadow-sm">
-                    <img src="{{ asset('img/remera.png') }}" class="card-img-top p-2 square-img" alt="Remera">
-                    <div class="card-body text-center">
-                        <h6 class="fw-bold">Remera Blanca UNNE</h6>
-                        <p class="text-primary mb-3">$15.000</p>
-                        <button onclick="window.location.href='{{ url('/paginaenconstruccion') }}'"
-                            class="btn btn-orange btn-sm w-100">Agregar</button>
-                    </div>
-                </div>
-            </div>
-            <div class="col-12 col-md-4 col-lg-3 product-card" data-category="indumentaria">
-                <div class="card h-100 border-0 shadow-sm">
-                    <img src="{{ asset('img/buzo.png') }}" class="card-img-top p-2 square-img" alt="Hoodie">
-                    <div class="card-body text-center">
-                        <h6 class="fw-bold">Hoodie Gris Premium</h6>
-                        <p class="text-primary mb-3">$32.000</p>
-                        <button onclick="window.location.href='{{ url('/paginaenconstruccion') }}'"
-                            class="btn btn-orange btn-sm w-100">Agregar</button>
-                    </div>
-                </div>
-            </div>
-            <div class="col-12 col-md-4 col-lg-3 product-card" data-category="indumentaria">
-                <div class="card h-100 border-0 shadow-sm">
-                    <img src="{{ asset('img/campera.png') }}" class="card-img-top p-2 square-img" alt="Campera">
-                    <div class="card-body text-center">
-                        <h6 class="fw-bold">Campera Varsity UNNE</h6>
-                        <p class="text-primary mb-3">$45.000</p>
-                        <button onclick="window.location.href='{{ url('/paginaenconstruccion') }}'"
-                            class="btn btn-orange btn-sm w-100">Agregar</button>
-                    </div>
-                </div>
-            </div>
-            <div class="col-12 col-md-4 col-lg-3 product-card" data-category="indumentaria">
-                <div class="card h-100 border-0 shadow-sm">
-                    <img src="{{ asset('img/Chomba.png') }}" class="card-img-top p-2 square-img" alt="Chomba">
-                    <div class="card-body text-center">
-                        <h6 class="fw-bold">Chomba Polo Azul</h6>
-                        <p class="text-primary mb-3">$22.000</p>
-                        <button onclick="window.location.href='{{ url('/paginaenconstruccion') }}'"
-                            class="btn btn-orange btn-sm w-100">Agregar</button>
-                    </div>
-                </div>
-            </div>
+            {{-- MAGIA DE LARAVEL: El bucle que genera las tarjetas dinámicamente --}}
+            @forelse ($productos as $producto)
+                {{-- Adaptamos el nombre de la categoría para que el JS del filtro la entienda (ej: "Indumentaria" -> "indumentaria") --}}
+                @php
+                    $categoriaFiltro = $producto->category ? Str::slug($producto->category->name) : 'otros';
+                @endphp
 
-            <div class="col-12 col-md-4 col-lg-3 product-card" data-category="accesorios">
-                <div class="card h-100 border-0 shadow-sm">
-                    <img src="{{ asset('img/mochila.png') }}" class="card-img-top p-2 square-img" alt="Mochila">
-                    <div class="card-body text-center">
-                        <h6 class="fw-bold">Mochila Porta Notebook</h6>
-                        <p class="text-primary mb-3">$38.000</p>
-                        <button onclick="window.location.href='{{ url('/paginaenconstruccion') }}'"
-                            class="btn btn-orange btn-sm w-100">Agregar</button>
-                    </div>
-                </div>
-            </div>
-            <div class="col-12 col-md-4 col-lg-3 product-card" data-category="accesorios">
-                <div class="card h-100 border-0 shadow-sm">
-                    <img src="{{ asset('img/gorra.png') }}" class="card-img-top p-2 square-img" alt="Gorro">
-                    <div class="card-body text-center">
-                        <h6 class="fw-bold">Gorra UNNE</h6>
-                        <p class="text-primary mb-3">$7.500</p>
-                        <button onclick="window.location.href='{{ url('/paginaenconstruccion') }}'"
-                            class="btn btn-orange btn-sm w-100">Agregar</button>
-                    </div>
-                </div>
-            </div>
-            <div class="col-12 col-md-4 col-lg-3 product-card" data-category="accesorios">
-                <div class="card h-100 border-0 shadow-sm">
-                    <img src="{{ asset('img/totebag.png') }}" class="card-img-top p-2 square-img" alt="Tote">
-                    <div class="card-body text-center">
-                        <h6 class="fw-bold">Tote Bag Ecológica</h6>
-                        <p class="text-primary mb-3">$5.000</p>
-                        <button onclick="window.location.href='{{ url('/paginaenconstruccion') }}'"
-                            class="btn btn-orange btn-sm w-100">Agregar</button>
-                    </div>
-                </div>
-            </div>
-            <div class="col-12 col-md-4 col-lg-3 product-card" data-category="accesorios">
-                <div class="card h-100 border-0 shadow-sm">
-                    <img src="{{ asset('img/llavero.png') }}" class="card-img-top p-2 square-img" alt="Llavero">
-                    <div class="card-body text-center">
-                        <h6 class="fw-bold">Llavero Metálico</h6>
-                        <p class="text-primary mb-3">$3.500</p>
-                        <button onclick="window.location.href='{{ url('/paginaenconstruccion') }}'"
-                            class="btn btn-orange btn-sm w-100">Agregar</button>
-                    </div>
-                </div>
-            </div>
-            <div class="col-12 col-md-4 col-lg-3 product-card" data-category="accesorios">
-                <div class="card h-100 border-0 shadow-sm">
-                    <img src="{{ asset('img/pulcera.png') }}" class="card-img-top p-2 square-img" alt="Pulsera">
-                    <div class="card-body text-center">
-                        <h6 class="fw-bold">Pulsera Bordada</h6>
-                        <p class="text-primary mb-3">$2.000</p>
-                        <button onclick="window.location.href='{{ url('/paginaenconstruccion') }}'"
-                            class="btn btn-orange btn-sm w-100">Agregar</button>
-                    </div>
-                </div>
-            </div>
+                <div class="col-12 col-md-4 col-lg-3 product-card" data-category="{{ $categoriaFiltro }}">
+                    <div class="card h-100 border-0 shadow-sm d-flex flex-column">
 
-            <div class="col-12 col-md-4 col-lg-3 product-card" data-category="libreria">
-                <div class="card h-100 border-0 shadow-sm">
-                    <img src="{{ asset('img/agenda.png') }}" class="card-img-top p-2 square-img" alt="Agenda">
-                    <div class="card-body text-center">
-                        <h6 class="fw-bold">Agenda 2026 UNNE</h6>
-                        <p class="text-primary mb-3">$14.000</p>
-                        <button onclick="window.location.href='{{ url('/paginaenconstruccion') }}'"
-                            class="btn btn-orange btn-sm w-100">Agregar</button>
-                    </div>
-                </div>
-            </div>
-            <div class="col-12 col-md-4 col-lg-3 product-card" data-category="libreria">
-                <div class="card h-100 border-0 shadow-sm">
-                    <img src="{{ asset('img/carpeta.png') }}" class="card-img-top p-2 square-img" alt="Carpeta">
-                    <div class="card-body text-center">
-                        <h6 class="fw-bold">Carpeta Universitaria</h6>
-                        <p class="text-primary mb-3">$9.500</p>
-                        <button onclick="window.location.href='{{ url('/paginaenconstruccion') }}'"
-                            class="btn btn-orange btn-sm w-100">Agregar</button>
-                    </div>
-                </div>
-            </div>
-            <div class="col-12 col-md-4 col-lg-3 product-card" data-category="libreria">
-                <div class="card h-100 border-0 shadow-sm">
-                    <img src="{{ asset('img/lapicera.png') }}" class="card-img-top p-2 square-img" alt="Lapicera">
-                    <div class="card-body text-center">
-                        <h6 class="fw-bold">Lapicera Ejecutiva</h6>
-                        <p class="text-primary mb-3">$6.000</p>
-                        <button onclick="window.location.href='{{ url('/paginaenconstruccion') }}'"
-                            class="btn btn-orange btn-sm w-100">Agregar</button>
-                    </div>
-                </div>
-            </div>
-            <div class="col-12 col-md-4 col-lg-3 product-card" data-category="libreria">
-                <div class="card h-100 border-0 shadow-sm">
-                    <img src="{{ asset('img/mousepad.png') }}" class="card-img-top p-2 square-img" alt="Mousepad">
-                    <div class="card-body text-center">
-                        <h6 class="fw-bold">Mousepad Ergonómico</h6>
-                        <p class="text-primary mb-3">$4.800</p>
-                        <button onclick="window.location.href='{{ url('/paginaenconstruccion') }}'"
-                            class="btn btn-orange btn-sm w-100">Agregar</button>
-                    </div>
-                </div>
-            </div>
-            <div class="col-12 col-md-4 col-lg-3 product-card" data-category="libreria">
-                <div class="card h-100 border-0 shadow-sm">
-                    <img src="{{ asset('img/stickers.png') }}" class="card-img-top p-2 square-img" alt="Stickers">
-                    <div class="card-body text-center">
-                        <h6 class="fw-bold">Pack Stickers UNNE</h6>
-                        <p class="text-primary mb-3">$1.500</p>
-                        <button onclick="window.location.href='{{ url('/paginaenconstruccion') }}'"
-                            class="btn btn-orange btn-sm w-100">Agregar</button>
-                    </div>
-                </div>
-            </div>
+                        {{-- Verificamos si tiene imagen en la base de datos --}}
+                        @if ($producto->image)
+                            <img src="{{ asset('img/' . $producto->image) }}" class="card-img-top p-2 square-img"
+                                alt="{{ $producto->name }}" style="object-fit: cover; aspect-ratio: 1/1;">
+                        @else
+                            {{-- Si no le cargaste imagen, mostramos un recuadro gris sutil --}}
+                            <div class="card-img-top p-2 square-img bg-light d-flex align-items-center justify-content-center text-muted"
+                                style="aspect-ratio: 1/1;">
+                                Sin imagen
+                            </div>
+                        @endif
 
-            <div class="col-12 col-md-4 col-lg-3 product-card" data-category="hogar">
-                <div class="card h-100 border-0 shadow-sm">
-                    <img src="{{ asset('img/taza.png') }}" class="card-img-top p-2 square-img" alt="Taza">
-                    <div class="card-body text-center">
-                        <h6 class="fw-bold">Taza de Cerámica</h6>
-                        <p class="text-primary mb-3">$4.500</p>
-                        <button onclick="window.location.href='{{ url('/paginaenconstruccion') }}'"
-                            class="btn btn-orange btn-sm w-100">Agregar</button>
+                        <div class="card-body text-center d-flex flex-column">
+                            <h6 class="fw-bold">{{ $producto->name }}</h6>
+                            <p class="text-primary mb-3 fw-bold">$ {{ number_format($producto->price, 0, ',', '.') }}
+                            </p>
+
+                            {{-- Lógica de permisos y stock para el botón --}}
+                            @auth
+                                <form action="/carrito/agregar/{{ $producto->id }}" method="POST" class="mt-auto w-100">
+                                    @csrf
+
+                                    @if ($producto->stock > 0)
+                                        {{-- Selector de cantidad (no le dejamos pedir más del stock total) --}}
+                                        <div class="input-group input-group-sm mb-2">
+                                            <span class="input-group-text bg-light text-muted fw-bold">Cant.</span>
+                                            <input type="number" name="quantity" class="form-control text-center"
+                                                value="1" min="1" max="{{ $producto->stock }}">
+                                        </div>
+                                        <button type="submit" class="btn btn-orange btn-sm w-100">Agregar al
+                                            carrito</button>
+                                    @else
+                                        {{-- Si el stock es 0, bloqueamos el botón --}}
+                                        <button type="button" class="btn btn-secondary btn-sm w-100 mt-auto"
+                                            disabled>Agotado</button>
+                                    @endif
+
+                                </form>
+                            @else
+                                <a href="/login" class="btn btn-secondary btn-sm w-100 mt-auto fw-bold">Ingresar para
+                                    comprar</a>
+                            @endauth
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="col-12 col-md-4 col-lg-3 product-card" data-category="hogar">
-                <div class="card h-100 border-0 shadow-sm">
-                    <img src="{{ asset('img/termo.png') }}" class="card-img-top p-2 square-img" alt="Termo">
-                    <div class="card-body text-center">
-                        <h6 class="fw-bold">Termo Negro Mate</h6>
-                        <p class="text-primary mb-3">$25.000</p>
-                        <button onclick="window.location.href='{{ url('/paginaenconstruccion') }}'"
-                            class="btn btn-orange btn-sm w-100">Agregar</button>
-                    </div>
+            @empty
+                {{-- Si la base de datos está vacía, mostramos este mensaje en vez de una pantalla en blanco --}}
+                <div class="col-12 text-center py-5">
+                    <h4 class="text-muted fw-bold">Próximamente habrá productos disponibles.</h4>
+                    <p class="text-muted">Estamos preparando el stock para vos.</p>
                 </div>
-            </div>
-            <div class="col-12 col-md-4 col-lg-3 product-card" data-category="hogar">
-                <div class="card h-100 border-0 shadow-sm">
-                    <img src="{{ asset('img/mate.png') }}" class="card-img-top p-2 square-img" alt="Mate">
-                    <div class="card-body text-center">
-                        <h6 class="fw-bold">Mate UNNE</h6>
-                        <p class="text-primary mb-3">$12.500</p>
-                        <button onclick="window.location.href='{{ url('/paginaenconstruccion') }}'"
-                            class="btn btn-orange btn-sm w-100">Agregar</button>
-                    </div>
-                </div>
-            </div>
-            <div class="col-12 col-md-4 col-lg-3 product-card" data-category="hogar">
-                <div class="card h-100 border-0 shadow-sm">
-                    <img src="{{ asset('img/botella.png') }}" class="card-img-top p-2 square-img" alt="Botella">
-                    <div class="card-body text-center">
-                        <h6 class="fw-bold">Botella Deportiva</h6>
-                        <p class="text-primary mb-3">$8.900</p>
-                        <button onclick="window.location.href='{{ url('/paginaenconstruccion') }}'"
-                            class="btn btn-orange btn-sm w-100">Agregar</button>
-                    </div>
-                </div>
-            </div>
-            <div class="col-12 col-md-4 col-lg-3 product-card" data-category="accesorios">
-                <div class="card h-100 border-0 shadow-sm">
-                    <img src="{{ asset('img/bufanda.png') }}" class="card-img-top p-2 square-img" alt="Bufanda">
-                    <div class="card-body text-center">
-                        <h6 class="fw-bold">Bufanda Institucional</h6>
-                        <p class="text-primary mb-3">$6.800</p>
-                        <button onclick="window.location.href='{{ url('/paginaenconstruccion') }}'"
-                            class="btn btn-orange btn-sm w-100">Agregar</button>
-                    </div>
-                </div>
-            </div>
+            @endforelse
 
         </div>
     </section>
@@ -331,7 +201,28 @@
         });
     </script>
 
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    {{-- SCRIPT PARA MANTENER LA POSICIÓN DEL SCROLL (SIN ANIMACIÓN) --}}
+    <script>
+        window.addEventListener("beforeunload", function() {
+            sessionStorage.setItem('scrollPosition', window.scrollY);
+        });
+
+        document.addEventListener("DOMContentLoaded", function() {
+            let savedScrollPosition = sessionStorage.getItem('scrollPosition');
+
+            if (savedScrollPosition) {
+                // Forzamos el comportamiento "instant" para evitar el efecto de viaje visual
+                window.scrollTo({
+                    top: parseInt(savedScrollPosition),
+                    left: 0,
+                    behavior: "instant"
+                });
+                sessionStorage.removeItem('scrollPosition');
+            }
+        });
+    </script>
 </body>
 
 </html>
