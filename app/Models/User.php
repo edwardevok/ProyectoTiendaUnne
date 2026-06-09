@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\SoftDeletes; // 1. IMPORTAMOS SOFTDELETES
 use App\Models\Order;
 use App\Models\Message;
 
@@ -17,7 +18,7 @@ use App\Models\Message;
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, SoftDeletes; // 2. ACTIVAMOS EL TRAIT AQUÍ
 
     /**
      * Get the attributes that should be cast.

@@ -2,42 +2,65 @@
 
 namespace App\Http\Controllers;
 
-
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rules\Password;
 
 class UserController extends Controller
 {
-    // Mostrar la pantalla con las dos columnas
-    public function index()
+    public function index(Request $request)
     {
-        // Buscamos a los clientes y a los admins por separado (excluyendo al fantasma de la lista de admins)
-        $clientes = User::where('role', 'cliente')->get();
+        // 1. CLIENTES ACTIVOS (Ahora con contador de pedidos)
+        $clientesQuery = User::where('role', 'cliente')->withCount('orders');
+
+        // Lógica del filtro de ordenamiento
+        if ($request->sort == 'compras_desc') {
+            $clientesQuery->orderBy('orders_count', 'desc');
+        } elseif ($request->sort == 'compras_asc') {
+            $clientesQuery->orderBy('orders_count', 'asc');
+        } else {
+            // Orden por defecto (los más recientes primero)
+            $clientesQuery->orderBy('created_at', 'desc');
+        }
+        
+        $clientes = $clientesQuery->get();
+
+        // 2. ADMINS ACTIVOS
         $admins = User::where('role', 'admin')->where('email', '!=', 'root@tiendaunne.com')->get();
 
-        // Los enviamos a la vista
-        return view('admin.usuarios', compact('clientes', 'admins'));
+        // 3. USUARIOS INACTIVOS (Suspendidos/Eliminados)
+        $clientesInactivos = User::onlyTrashed()->where('role', 'cliente')->get();
+        $adminsInactivos = User::onlyTrashed()->where('role', 'admin')->get();
+
+        return view('admin.usuarios', compact('clientes', 'admins', 'clientesInactivos', 'adminsInactivos'));
     }
 
     public function destroy($id)
     {
         $user = User::findOrFail($id);
 
-        // BARRERA DE SEGURIDAD: Si intentan borrar al fantasma mediante una URL, lo frenamos en seco
         if ($user->email === 'root@tiendaunne.com') {
             return redirect()->back()->withErrors(['error' => 'Acción denegada: Esta cuenta maestra del sistema no puede ser eliminada.']);
         }
 
-        $user->delete();
+        $user->delete(); // Suspende al usuario (SoftDelete)
 
-        return redirect('/admin/usuarios')->with('success', 'Usuario eliminado correctamente.');
+        // Verificamos si era admin o cliente para el mensaje de éxito
+        $mensaje = $user->role === 'cliente' ? 'Cliente suspendido correctamente.' : 'Administrador desactivado correctamente.';
+        return redirect('/admin/usuarios')->with('success', $mensaje);
     }
 
-    // Guardar un nuevo administrador desde la ventanita
+    public function restore($id)
+    {
+        $user = User::withTrashed()->findOrFail($id);
+        $user->restore();
+
+        $mensaje = $user->role === 'cliente' ? 'Cliente reactivado exitosamente.' : 'Administrador restaurado y activo.';
+        return redirect('/admin/usuarios')->with('success', $mensaje);
+    }
+
     public function store(Request $request)
     {
-        // 1. Las reglas estrictas
         $reglas = [
             'name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
@@ -46,13 +69,10 @@ class UserController extends Controller
             'password' => [
                 'required', 
                 'string', 
-                \Illuminate\Validation\Rules\Password::min(8)
-                    ->letters()
-                    ->mixedCase()
+                \Illuminate\Validation\Rules\Password::min(8)->letters()->mixedCase()
             ],
         ];
 
-        // 2. Tus traducciones personalizadas en español
         $mensajes = [
             'name.required' => 'El nombre es obligatorio.',
             'last_name.required' => 'El apellido es obligatorio.',
@@ -65,10 +85,8 @@ class UserController extends Controller
             'password.mixed' => 'La contraseña debe tener al menos una letra mayúscula y una minúscula.',
         ];
 
-        // 3. Ejecutamos la validación usando ambas listas
         $request->validate($reglas, $mensajes);
 
-        // 4. Si pasa la validación, creamos el usuario
         User::create([
             'name' => $request->name,
             'last_name' => $request->last_name,
@@ -77,10 +95,9 @@ class UserController extends Controller
             'role' => $request->role,
         ]);
 
-        return redirect('/admin/usuarios');
+        return redirect('/admin/usuarios')->with('success', 'Administrador creado correctamente.');
     }
 
-    // Actualizar un administrador existente
     public function update(Request $request, $id)
     {
         $user = User::findOrFail($id);
@@ -88,10 +105,9 @@ class UserController extends Controller
         $reglas = [
             'name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
-            // El '.$id' al final le dice a Laravel: "El email debe ser único, EXCEPTO si es el mismo que ya tiene este usuario"
             'email' => 'required|email|unique:users,email,' . $id,
             'password' => [
-                'nullable', // ¡La contraseña es opcional al editar!
+                'nullable', 
                 'string', 
                 \Illuminate\Validation\Rules\Password::min(8)->letters()->mixedCase()
             ],
@@ -109,12 +125,10 @@ class UserController extends Controller
 
         $request->validate($reglas, $mensajes);
 
-        // Actualizamos los datos básicos
         $user->name = $request->name;
         $user->last_name = $request->last_name;
         $user->email = $request->email;
 
-        // Si escribió algo en el campo de contraseña, la encriptamos y la cambiamos
         if ($request->filled('password')) {
             $user->password = bcrypt($request->password);
         }
@@ -123,6 +137,4 @@ class UserController extends Controller
 
         return redirect('/admin/usuarios')->with('success', 'Administrador actualizado correctamente.');
     }
-
-    
 }

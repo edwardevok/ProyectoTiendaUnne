@@ -79,6 +79,7 @@ Route::middleware(['auth', \App\Http\Middleware\IsAdmin::class])->group(function
     Route::get('/admin/productos/crear', [ProductController::class, 'create']);
     Route::post('/admin/productos', [ProductController::class, 'store']);
     Route::delete('/admin/productos/{producto}', [ProductController::class, 'destroy']); 
+    Route::put('/admin/productos/{id}/restaurar', [ProductController::class, 'restore']); // <-- NUEVA: Restaurar Producto
     Route::get('/admin/productos/{producto}/editar', [ProductController::class, 'edit']);
     Route::put('/admin/productos/{producto}', [ProductController::class, 'update']);
 
@@ -87,6 +88,7 @@ Route::middleware(['auth', \App\Http\Middleware\IsAdmin::class])->group(function
     Route::post('/admin/usuarios', [UserController::class, 'store']);
     Route::put('/admin/usuarios/{id}', [UserController::class, 'update']);
     Route::delete('/admin/usuarios/{id}', [UserController::class, 'destroy']);
+    Route::put('/admin/usuarios/{id}/restaurar', [UserController::class, 'restore']); // <-- NUEVA: Restaurar Usuario
 
     // Categorias
     Route::get('/admin/categorias', [CategoryController::class, 'index']);

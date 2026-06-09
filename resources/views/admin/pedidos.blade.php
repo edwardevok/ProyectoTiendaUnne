@@ -70,10 +70,30 @@
                             <tr class="border-bottom">
                                 <td class="py-3 fw-bold text-dark text-start">#{{ $pedido->id }}</td>
 
+                                {{-- APLICAMOS EL NULL COALESCING AQUÍ PARA PROTEGER LA VISTA --}}
                                 <td class="py-3 text-start">
-                                    <span class="d-block fw-bold">{{ $pedido->user->name }}
-                                        {{ $pedido->user->last_name }}</span>
-                                    <small class="text-muted">{{ $pedido->user->email }}</small>
+                                    @if ($pedido->user)
+                                        <div class="d-flex align-items-center gap-2 mb-1">
+                                            <span class="fw-bold text-dark">
+                                                {{ $pedido->user->name }} {{ $pedido->user->last_name }}
+                                            </span>
+                                            {{-- Verificamos si está suspendido usando trashed() --}}
+                                            @if ($pedido->user->trashed())
+                                                <span
+                                                    class="badge bg-danger bg-opacity-10 text-danger border border-danger-subtle"
+                                                    style="font-size: 0.65rem;">Suspendido</span>
+                                            @else
+                                                <span
+                                                    class="badge bg-success bg-opacity-10 text-success border border-success-subtle"
+                                                    style="font-size: 0.65rem;">Activo</span>
+                                            @endif
+                                        </div>
+                                        <small class="text-muted">{{ $pedido->user->email }}</small>
+                                    @else
+                                        {{-- Esto solo aparecerá si el usuario fue borrado físicamente de Workbench ANTES del SoftDelete --}}
+                                        <span class="d-block fw-bold text-muted">Usuario Eliminado</span>
+                                        <small class="text-muted">Sin registro</small>
+                                    @endif
                                 </td>
 
                                 <td class="py-3 text-muted small">
@@ -148,6 +168,7 @@
                                     <button type="button" class="btn btn-sm btn-light border fw-bold px-3"
                                         style="border-radius: 6px;" data-bs-toggle="modal"
                                         data-bs-target="#modalPedido{{ $pedido->id }}">Ver detalle</button>
+
                                     {{-- MODAL CON EL DETALLE DEL PEDIDO --}}
                                     <div class="modal fade text-start" id="modalPedido{{ $pedido->id }}" tabindex="-1"
                                         aria-hidden="true">
@@ -166,9 +187,29 @@
                                                         <div class="col-md-6 mb-3 mb-md-0">
                                                             <h6 class="fw-bold text-muted mb-2 text-uppercase"
                                                                 style="font-size: 0.8rem;">Datos del Cliente</h6>
-                                                            <p class="mb-1 text-dark"><strong>{{ $pedido->user->name }}
-                                                                    {{ $pedido->user->last_name }}</strong></p>
-                                                            <p class="mb-0 text-muted">{{ $pedido->user->email }}</p>
+
+                                                            {{-- TAMBIÉN PROTEGEMOS EL MODAL CON NULL COALESCING --}}
+                                                            <div class="d-flex align-items-center gap-2 mb-1">
+                                                                <strong class="text-dark">
+                                                                    {{ $pedido->user->name ?? 'Usuario Eliminado' }}
+                                                                    {{ $pedido->user->last_name ?? '' }}
+                                                                </strong>
+                                                                @if ($pedido->user)
+                                                                    @if ($pedido->user->trashed())
+                                                                        <span
+                                                                            class="badge bg-danger bg-opacity-10 text-danger border border-danger-subtle"
+                                                                            style="font-size: 0.65rem;">Suspendido</span>
+                                                                    @else
+                                                                        <span
+                                                                            class="badge bg-success bg-opacity-10 text-success border border-success-subtle"
+                                                                            style="font-size: 0.65rem;">Activo</span>
+                                                                    @endif
+                                                                @endif
+                                                            </div>
+                                                            <p class="mb-0 text-muted">
+                                                                {{ $pedido->user->email ?? 'Sin registro' }}</p>
+                                                            <p class="mb-0 text-muted">
+                                                                {{ $pedido->user->email ?? 'Sin registro' }}</p>
                                                         </div>
                                                         <div class="col-md-6">
                                                             <h6 class="fw-bold text-muted mb-2 text-uppercase"

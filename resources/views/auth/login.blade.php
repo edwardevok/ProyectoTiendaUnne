@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Iniciar Sesión - Tienda UNNE</title>
 
-    {{-- Carga de Bootstrap (si ya lo tienes configurado con Vite, puedes borrar esta línea) --}}
+    {{-- Carga de Bootstrap --}}
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <style>
@@ -24,20 +24,17 @@
 
         .btn-unne-orange:hover {
             background-color: #e65c00;
-            /* Un tono naranja ligeramente más oscuro */
             color: white;
         }
     </style>
 </head>
-
-{{-- El d-flex flex-column y min-vh-100 aseguran que el footer siempre quede abajo --}}
 
 <body class="d-flex flex-column min-vh-100 bg-light">
 
     {{-- Barra de Navegación --}}
     @include('partials.navbar')
 
-    {{-- Contenedor principal: flex-grow-1 hace que ocupe todo el espacio sobrante --}}
+    {{-- Contenedor principal --}}
     <main class="flex-grow-1 d-flex align-items-center justify-content-center my-5">
         <div class="container">
             <div class="row justify-content-center">
@@ -53,21 +50,36 @@
 
                             <h3 class="fw-bold mb-4 text-unne-blue">Iniciar Sesión</h3>
 
-                            {{-- AQUÍ ESTÁ EL CAMBIO: action="/login" --}}
                             <form action="/login" method="POST">
                                 @csrf
 
+                                {{-- Campo de Correo Electrónico --}}
                                 <div class="form-floating mb-3 text-start">
-                                    <input type="email" class="form-control" id="email" name="email"
-                                        placeholder="tu@email.com" required>
+                                    <input type="email" class="form-control @error('email') is-invalid @enderror"
+                                        id="email" name="email" placeholder="tu@email.com"
+                                        value="{{ old('email') }}" required>
                                     <label for="email" class="text-muted">Correo Electrónico</label>
+
+                                    @error('email')
+                                        <div class="invalid-feedback fw-bold">
+                                            {{ $message }}
+                                        </div>
+                                    @enderror
                                 </div>
 
+                                {{-- Campo de Contraseña (AHORA CON MANEJO DE ERRORES) --}}
                                 <div class="form-floating mb-4 text-start">
-                                    <input type="password" class="form-control" id="password" name="password"
-                                        placeholder="Contraseña" required>
+                                    <input type="password" class="form-control @error('password') is-invalid @enderror"
+                                        id="password" name="password" placeholder="Contraseña" required>
                                     <label for="password" class="text-muted">Contraseña</label>
+
+                                    @error('password')
+                                        <div class="invalid-feedback fw-bold">
+                                            {{ $message }}
+                                        </div>
+                                    @enderror
                                 </div>
+
 
                                 <button class="btn btn-unne-orange w-100 py-3 fw-bold rounded-3 fs-5" type="submit">
                                     Ingresar

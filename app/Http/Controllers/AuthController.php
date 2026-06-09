@@ -12,26 +12,34 @@ class AuthController extends Controller
     // --- LÓGICA DE REGISTRO ---
     public function register(Request $request)
     {
-        // 1. Validaciones estrictas con seguridad de contraseña
+        // 1. Validaciones estrictas con seguridad de contraseña y mensajes separados
         $request->validate([
             'name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
-            'email' => 'required|string|email:filter|max:255|unique:users',  //email: rfc,dns
-            // Convertimos las reglas de password en un arreglo para usar Regex
+            'email' => 'required|string|email:filter|max:255|unique:users', 
             'password' => [
                 'required',
                 'string',
                 'min:8',
-                'regex:/[a-zA-Z]/', // Regla: Debe contener al menos una letra
-                'regex:/[A-Z]/',    // Regla: Debe contener al menos una letra mayúscula
-                'confirmed'
+                'confirmed',
+                // Nuestro validador personalizado (Closure)
+                function ($attribute, $value, $fail) {
+                    if (!preg_match('/[A-Z]/', $value)) {
+                        $fail('A tu contraseña le falta al menos una letra MAYÚSCULA.');
+                    }
+                    if (!preg_match('/[a-z]/', $value)) {
+                        $fail('A tu contraseña le falta al menos una letra minúscula.');
+                    }
+                    if (!preg_match('/[0-9]/', $value)) {
+                        $fail('A tu contraseña le falta al menos un número.');
+                    }
+                },
             ],
         ], [
-            // Mensajes de error personalizados en español
+            // Mensajes de error personalizados en español para las reglas generales
             'email.email' => 'El correo debe tener un formato válido (ej: tu@email.com).',
             'email.unique' => 'Este correo ya está registrado en la tienda.',
             'password.min' => 'La contraseña debe tener al menos 8 caracteres.',
-            'password.regex' => 'La contraseña debe contener al menos una letra y una mayúscula.',
             'password.confirmed' => 'Las contraseñas no coinciden.',
         ]);
 
@@ -53,29 +61,38 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         // 1. Validamos que el usuario haya escrito algo
-        $credentials = $request->validate([
+        $request->validate([
             'email' => ['required', 'email:filter'],
             'password' => ['required'],
         ]);
 
-        // 2. Intentamos iniciar sesión con esos datos
-        if (Auth::attempt($credentials)) {
-            $request->session()->regenerate();
+        // 2. Buscamos al usuario en la base de datos por su correo
+        $user = User::where('email', $request->email)->first();
 
-            // 3. Verificamos el rol del usuario
-            if (Auth::user()->role === 'admin') {
-                // Si es administrador, lo mandamos directo a su panel
-                return redirect()->intended('/admin/dashboard');
-            }
-
-            // CORREGIDO: Lo mandamos a '/index' en lugar de '/'
-            return redirect()->intended('/index');
+        // 3. Verificamos si el correo NO existe
+        if (!$user) {
+            return back()->withErrors([
+                'email' => 'El correo ingresado no está registrado.',
+            ])->onlyInput('email'); // Mantiene el email escrito
         }
 
-        // Si los datos son incorrectos, lo devolvemos con un error
-        return back()->withErrors([
-            'email' => 'Las credenciales proporcionadas no coinciden con nuestros registros.',
-        ])->onlyInput('email');
+        // 4. Si el correo existe, verificamos si la contraseña NO coincide
+        if (!Hash::check($request->password, $user->password)) {
+            return back()->withErrors([
+                'password' => 'La contraseña ingresada es incorrecta.',
+            ])->onlyInput('email'); // Mantiene el email escrito
+        }
+
+        // 5. Si pasamos los dos controles anteriores, iniciamos sesión
+        Auth::login($user);
+        $request->session()->regenerate();
+
+        // Verificamos el rol para redirigir
+        if ($user->role === 'admin') {
+            return redirect()->intended('/admin/dashboard');
+        }
+
+        return redirect()->intended('/index');
     }
 
     // --- LÓGICA DE LOGOUT ---

@@ -20,9 +20,9 @@ class Order extends Model
 
     // Relación: Un pedido pertenece a un usuario (cliente)
     public function user()
-    {
-        return $this->belongsTo(User::class);
-    }
+{
+    return $this->belongsTo(User::class)->withTrashed();
+}
 
     // Relación: Un pedido tiene muchos productos detallados
     public function items()

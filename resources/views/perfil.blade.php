@@ -42,37 +42,76 @@
         @endif
 
         <div class="row g-4">
-            {{-- Columna Izquierda: Datos Personales --}}
+            {{-- Columna Izquierda: Mis Datos Combinados --}}
             <div class="col-md-4">
                 <div class="card border-0 shadow-sm rounded-4">
                     <div class="card-body p-4">
                         <h5 class="fw-bold mb-4" style="color: #021A54;">Mis Datos</h5>
+
+                        {{-- Formulario unificado --}}
                         <form action="/perfil/actualizar" method="POST">
                             @csrf @method('PUT')
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
+
+                            {{-- Fila Nombre y Apellido --}}
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-6">
                                     <label class="form-label small fw-bold text-muted">Nombre</label>
-                                    <input type="text" name="name" class="form-control p-2"
-                                        value="{{ $user->name }}" required style="border-radius: 8px;">
+                                    <input type="text" name="name"
+                                        class="form-control p-2 @error('name') is-invalid @enderror"
+                                        value="{{ old('name', $user->name) }}" required style="border-radius: 8px;">
+                                    @error('name')
+                                        <div class="text-danger small">{{ $message }}</div>
+                                    @enderror
                                 </div>
-                                <div class="col-md-6 mb-3">
+                                <div class="col-md-6">
                                     <label class="form-label small fw-bold text-muted">Apellido</label>
-                                    <input type="text" name="last_name" class="form-control p-2"
-                                        value="{{ $user->last_name }}" style="border-radius: 8px;">
+                                    <input type="text" name="last_name"
+                                        class="form-control p-2 @error('last_name') is-invalid @enderror"
+                                        value="{{ old('last_name', $user->last_name) }}" required
+                                        style="border-radius: 8px;">
+                                    @error('last_name')
+                                        <div class="text-danger small">{{ $message }}</div>
+                                    @enderror
                                 </div>
                             </div>
+
+                            <hr class="my-4 text-mutedOp"> {{-- Separador visual --}}
+                            <h6 class="fw-bold mb-3 text-muted">Cambiar Contraseña <small>(Opcional)</small></h6>
+
+                            {{-- Campos de Contraseña (Sin 'required' porque el cambio es opcional) --}}
                             <div class="mb-3">
-                                <label class="form-label small fw-bold text-muted">Correo Electrónico</label>
-                                <input type="email" name="email" class="form-control p-2"
-                                    value="{{ $user->email }}" required style="border-radius: 8px;">
+                                <label class="form-label small fw-bold text-muted">Contraseña Actual</label>
+                                <input type="password" name="current_password"
+                                    class="form-control p-2 @error('current_password') is-invalid @enderror"
+                                    style="border-radius: 8px;">
+                                @error('current_password')
+                                    <span class="text-danger small">{{ $message }}</span>
+                                @enderror
                             </div>
+
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold text-muted">Nueva Contraseña</label>
+                                <input type="password" name="new_password"
+                                    class="form-control p-2 @error('new_password') is-invalid @enderror"
+                                    style="border-radius: 8px;">
+                                @error('new_password')
+                                    <span class="text-danger small">{{ $message }}</span>
+                                @enderror
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="form-label small fw-bold text-muted">Confirmar Nueva Contraseña</label>
+                                <input type="password" name="new_password_confirmation" class="form-control p-2"
+                                    style="border-radius: 8px;">
+                            </div>
+
                             <button type="submit" class="btn btn-orange w-100 py-2 rounded-3">Guardar Cambios</button>
                         </form>
                     </div>
                 </div>
             </div>
 
-            {{-- Columna Derecha: Seguimiento y Consultas --}}
+            {{-- Columna Derecha: Seguimiento y Consultas (Sin Cambios) --}}
             <div class="col-md-8">
                 {{-- Pedidos con Scroll --}}
                 <div class="card border-0 shadow-sm rounded-4 mb-4">
@@ -113,7 +152,7 @@
                     </div>
                 </div>
 
-                {{-- Mis Consultas con Scroll (CORREGIDO) --}}
+                {{-- Mis Consultas con Scroll --}}
                 <div class="card border-0 shadow-sm rounded-4">
                     <div class="card-body p-4">
                         <h5 class="fw-bold mb-4" style="color: #021A54;">Mis Consultas</h5>
@@ -131,20 +170,14 @@
                                     @forelse($messages as $msg)
                                         <tr>
                                             <td class="small">{{ $msg->created_at->format('d/m/Y') }}</td>
-
-                                            {{-- Corregido: Usamos 'body' --}}
                                             <td class="small" title="{{ $msg->body }}">
                                                 {{ Str::limit($msg->body, 40) }}</td>
-
-                                            {{-- Corregido: Usamos 'status' y verificamos si dice 'Resuelto' --}}
                                             <td>
                                                 <span
                                                     class="badge {{ strtolower($msg->status) == 'resuelto' ? 'bg-success' : 'bg-warning' }}">
                                                     {{ ucfirst($msg->status) }}
                                                 </span>
                                             </td>
-
-                                            {{-- Corregido: Usamos 'reply' --}}
                                             <td class="small text-muted">{{ $msg->reply ?? 'Esperando...' }}</td>
                                         </tr>
                                     @empty
