@@ -24,7 +24,7 @@
         <div class="card-body p-4">
 
             {{-- Buscador y Filtros dinámicos --}}
-            <form action="/admin/pedidos" method="GET" class="d-flex gap-3 mb-4">
+            <form action="/admin/pedidos" method="GET" class="d-flex flex-wrap gap-3 mb-4">
                 <input type="text" name="search" class="form-control border shadow-sm"
                     placeholder="Buscar pedido por Nro (#)" style="width: 250px; border-radius: 8px;"
                     value="{{ request('search') }}">
@@ -42,9 +42,20 @@
                     <option value="entregado" {{ request('status') == 'entregado' ? 'selected' : '' }}>Entregado</option>
                 </select>
 
+                {{-- NUEVO: Filtro de Mayor a Menor valor --}}
+                <select name="sort_total" class="form-select border shadow-sm" style="width: 200px; border-radius: 8px;"
+                    onchange="this.form.submit()">
+                    <option value="" {{ request('sort_total') == '' ? 'selected' : '' }}>Ordenar por total</option>
+                    <option value="desc" {{ request('sort_total') == 'desc' ? 'selected' : '' }}>Mayor valor primero
+                    </option>
+                    <option value="asc" {{ request('sort_total') == 'asc' ? 'selected' : '' }}>Menor valor primero
+                    </option>
+                </select>
+
                 {{-- Botón de limpiar filtros --}}
-                @if (request()->has('search') || request()->has('status'))
-                    <a href="/admin/pedidos" class="btn btn-light border shadow-sm" style="border-radius: 8px;">Limpiar</a>
+                @if (request('search') || (request('status') && request('status') != 'Todos los estados') || request('sort_total'))
+                    <a href="/admin/pedidos" class="btn btn-light border shadow-sm fw-bold"
+                        style="border-radius: 8px;">Limpiar</a>
                 @endif
             </form>
 
@@ -70,14 +81,12 @@
                             <tr class="border-bottom">
                                 <td class="py-3 fw-bold text-dark text-start">#{{ $pedido->id }}</td>
 
-                                {{-- APLICAMOS EL NULL COALESCING AQUÍ PARA PROTEGER LA VISTA --}}
                                 <td class="py-3 text-start">
                                     @if ($pedido->user)
                                         <div class="d-flex align-items-center gap-2 mb-1">
                                             <span class="fw-bold text-dark">
                                                 {{ $pedido->user->name }} {{ $pedido->user->last_name }}
                                             </span>
-                                            {{-- Verificamos si está suspendido usando trashed() --}}
                                             @if ($pedido->user->trashed())
                                                 <span
                                                     class="badge bg-danger bg-opacity-10 text-danger border border-danger-subtle"
@@ -90,7 +99,6 @@
                                         </div>
                                         <small class="text-muted">{{ $pedido->user->email }}</small>
                                     @else
-                                        {{-- Esto solo aparecerá si el usuario fue borrado físicamente de Workbench ANTES del SoftDelete --}}
                                         <span class="d-block fw-bold text-muted">Usuario Eliminado</span>
                                         <small class="text-muted">Sin registro</small>
                                     @endif
@@ -188,7 +196,6 @@
                                                             <h6 class="fw-bold text-muted mb-2 text-uppercase"
                                                                 style="font-size: 0.8rem;">Datos del Cliente</h6>
 
-                                                            {{-- TAMBIÉN PROTEGEMOS EL MODAL CON NULL COALESCING --}}
                                                             <div class="d-flex align-items-center gap-2 mb-1">
                                                                 <strong class="text-dark">
                                                                     {{ $pedido->user->name ?? 'Usuario Eliminado' }}
@@ -206,8 +213,6 @@
                                                                     @endif
                                                                 @endif
                                                             </div>
-                                                            <p class="mb-0 text-muted">
-                                                                {{ $pedido->user->email ?? 'Sin registro' }}</p>
                                                             <p class="mb-0 text-muted">
                                                                 {{ $pedido->user->email ?? 'Sin registro' }}</p>
                                                         </div>

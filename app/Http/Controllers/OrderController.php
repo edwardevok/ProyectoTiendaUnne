@@ -97,7 +97,8 @@ class OrderController extends Controller
     // 3. Mostrar la lista de pedidos en el panel Admin (con búsqueda y filtros)
     public function adminIndex(Request $request)
     {
-        $query = Order::with(['user', 'items.product'])->orderBy('created_at', 'desc');
+        // Le quitamos el orderBy por defecto de acá para que sea dinámico
+        $query = Order::with(['user', 'items.product']);
 
         // Si el admin escribió algo en el buscador
         if ($request->filled('search')) {
@@ -111,19 +112,31 @@ class OrderController extends Controller
             $query->where('status', $statusDb);
         }
 
-        $pedidos = $query->paginate(15);
+        // NUEVO: Si el admin filtró por valor total (Mayor o Menor)
+        if ($request->filled('sort_total')) {
+            if ($request->sort_total == 'desc') {
+                $query->orderBy('total', 'desc'); // Los más caros primero
+            } elseif ($request->sort_total == 'asc') {
+                $query->orderBy('total', 'asc'); // Los más baratos primero
+            }
+        } else {
+            // Orden por defecto: los pedidos más nuevos arriba de todo
+            $query->orderBy('created_at', 'desc');
+        }
+
+        // El appends(request()->query()) asegura que si el admin pasa a la página 2, 
+        // no se pierdan los filtros aplicados (estado, búsqueda o precio)
+        $pedidos = $query->paginate(15)->appends(request()->query());
 
         return view('admin.pedidos', compact('pedidos'));
     }
 
-    // 4. Actualizar el estado de un pedido al instante
     // 4. Actualizar el estado de un pedido al instante
     public function updateStatus(Request $request, $id)
     {
         $pedido = Order::findOrFail($id);
         
         $request->validate([
-            // AGREGAMOS 'listo_para_retirar' AQUÍ:
             'status' => 'required|in:pendiente,en_preparacion,listo_para_retirar,enviado,entregado'
         ]);
 

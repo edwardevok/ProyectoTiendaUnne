@@ -12,23 +12,40 @@ class ProductController extends Controller
     {
         $categorias = \App\Models\Category::all();
 
-        // PRODUCTOS ACTIVOS (SoftDeletes los oculta automáticamente)
+        // Empezamos la consulta
         $query = \App\Models\Product::with('category');
 
-        if ($request->has('search') && $request->search != '') {
+        // Búsqueda por texto
+        if ($request->filled('search')) {
             $query->where('name', 'like', '%' . $request->search . '%');
         }
 
-        if ($request->has('category_id') && $request->category_id != '') {
+        // Filtro por categoría
+        if ($request->filled('category_id')) {
             $query->where('category_id', $request->category_id);
         }
 
+        // NUEVO: Ordenamiento 1 - Por Precio
+        if ($request->filled('sort_price')) {
+            $query->orderBy('price', $request->sort_price); // 'desc' o 'asc'
+        }
+
+        // NUEVO: Ordenamiento 2 - Por Stock (Totalmente acumulable con el precio)
+        if ($request->filled('sort_stock')) {
+            $query->orderBy('stock', $request->sort_stock); // 'desc' o 'asc'
+        }
+
+        // Orden por defecto: Solo se aplica si el admin NO seleccionó precio ni stock
+        if (!$request->filled('sort_price') && !$request->filled('sort_stock')) {
+            $query->orderBy('id', 'desc');
+        }
+
+        // Traemos los productos listos
         $productos = $query->get();
 
-        // NUEVO: PRODUCTOS INACTIVOS (Solo los que tienen deleted_at lleno)
+        // Productos Inactivos (ocultos por SoftDeletes)
         $productosInactivos = \App\Models\Product::onlyTrashed()->orderBy('deleted_at', 'desc')->get();
 
-        // Enviamos las 3 variables a la vista
         return view('admin.productos', compact('productos', 'categorias', 'productosInactivos'));
     }
 
@@ -68,25 +85,18 @@ class ProductController extends Controller
         return redirect('/admin/productos');
     }
 
-    // ELIMINACIÓN (Ahora es SoftDelete automático)
     public function destroy($id)
     {
         $producto = Product::findOrFail($id);
-        
-        // Ya NO borramos la imagen física porque el producto sigue existiendo lógicamente
-        
-        // Eliminación lógica
-        $producto->delete();
+        $producto->delete(); // SoftDelete
 
         return redirect('/admin/productos')->with('success', 'Producto desactivado correctamente.');
     }
 
-    // NUEVO: RESTAURAR PRODUCTO
     public function restore($id)
     {
-        //withTrashed() le dice a Laravel: "buscalo incluso si está eliminado"
         $producto = Product::withTrashed()->findOrFail($id); 
-        $producto->restore(); // Limpia la columna deleted_at
+        $producto->restore(); 
 
         return redirect('/admin/productos')->with('success', 'Producto restaurado y activo.');
     }
@@ -117,7 +127,6 @@ class ProductController extends Controller
 
     public function catalogo()
     {
-        // Automáticamente solo trae los activos
         $productos = Product::all(); 
         $categorias = \App\Models\Category::all(); 
 
