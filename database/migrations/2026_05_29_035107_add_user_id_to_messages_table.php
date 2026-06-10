@@ -9,11 +9,11 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-   public function up(): void
+    public function up(): void
     {
         Schema::table('messages', function (Blueprint $table) {
-            // Esto crea la columna y aplica la regla de borrado en cascada
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            // Acá está la clave: agregamos nullable() para permitir visitantes anónimos
+            $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('cascade');
         });
     }
 
@@ -23,7 +23,8 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('messages', function (Blueprint $table) {
-            //
+            $table->dropForeign(['user_id']);
+            $table->dropColumn('user_id');
         });
     }
 };

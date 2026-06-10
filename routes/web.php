@@ -23,7 +23,10 @@ Route::get('/comercializacion', function () { return view('comercializacion'); }
 Route::get('/terminos', function () { return view('terminos'); });
 Route::get('/productos', [ProductController::class, 'catalogo']);
 Route::get('/paginaenconstruccion', function () { return view('paginaenconstruccion'); });
+
+// Contacto (Vista y Envío de formulario público)
 Route::get('/contacto', function () { return view('contacto'); }); 
+Route::post('/contacto', [MessageController::class, 'storeFrontEnd']); // <-- MOVIDA AQUÍ
 
 
 // ==========================================
@@ -41,9 +44,6 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 // 3. RUTAS PROTEGIDAS PARA CLIENTES (Logueados)
 // ==========================================
 Route::middleware(['auth'])->group(function () {
-    
-    // Contacto (Solo logueados)
-    Route::post('/contacto', [MessageController::class, 'storeFrontEnd']);
     
     // Rutas del Carrito de Compras
     Route::get('/carrito', [CartController::class, 'index']);

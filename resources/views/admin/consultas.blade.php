@@ -73,10 +73,90 @@
                     aria-labelledby="registrados-tab" tabindex="0">
                     <div style="max-height: 500px; overflow-y: auto; overflow-x: hidden; padding-right: 5px;">
                         @forelse ($consultasRegistrados as $consulta)
-                            @include('partials.admin_consulta_card', [
-                                'consulta' => $consulta,
-                                'esRegistrado' => true,
-                            ])
+                            @php
+                                $currentStatus = $consulta->status ?? 'No leído';
+                            @endphp
+
+                            {{-- DISEÑO DE TARJETA PARA REGISTRADOS --}}
+                            <div
+                                class="d-flex justify-content-between align-items-center bg-light rounded-3 p-3 mb-2 border-start border-4 {{ $currentStatus == 'No leído' ? 'border-danger' : 'border-success' }}">
+                                <div>
+                                    <div class="d-flex align-items-center gap-2 mb-1">
+                                        <strong class="text-dark fs-5 mb-0">
+                                            {{ $consulta->name ?? 'Usuario' }} {{ $consulta->last_name ?? '' }}
+                                        </strong>
+                                        <span
+                                            class="badge bg-primary bg-opacity-10 text-primary border border-primary-subtle"
+                                            style="font-size: 0.65rem;">Registrado</span>
+
+                                        <button onclick="copiarEmail('{{ $consulta->email ?? '' }}')"
+                                            class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1 py-0 px-2 ms-2 shadow-sm"
+                                            title="Copiar correo" style="border-radius: 6px; height: 26px;">
+                                            <span class="small fw-bold">Mail</span>
+                                        </button>
+                                    </div>
+
+                                    <span class="badge bg-secondary mb-1 text-white small">Asunto:
+                                        {{ $consulta->subject ?? 'General' }}</span>
+
+                                    <small class="text-muted d-block" title="{{ $consulta->body }}">
+                                        {{ Str::limit($consulta->body ?? '(Sin cuerpo de mensaje)', 80) }}
+                                    </small>
+                                </div>
+
+                                <div class="d-flex align-items-center gap-3">
+                                    <span
+                                        class="badge {{ $currentStatus == 'No leído' ? 'bg-danger' : 'bg-success' }} px-3 py-2 rounded-3">
+                                        {{ $currentStatus }}
+                                    </span>
+
+                                    @if ($currentStatus !== 'Resuelto')
+                                        <button class="btn btn-sm btn-primary fw-bold px-3" type="button"
+                                            data-bs-toggle="collapse" data-bs-target="#collapseReply{{ $consulta->id }}"
+                                            aria-expanded="false" style="border-radius: 6px;">
+                                            Responder
+                                        </button>
+                                    @else
+                                        <button class="btn btn-sm btn-outline-success fw-bold px-3" type="button"
+                                            data-bs-toggle="collapse" data-bs-target="#collapseReply{{ $consulta->id }}"
+                                            aria-expanded="false" style="border-radius: 6px;">
+                                            Ver respuesta
+                                        </button>
+                                    @endif
+                                </div>
+                            </div>
+
+                            {{-- Desplegable de respuestas --}}
+                            <div class="collapse mb-4" id="collapseReply{{ $consulta->id }}">
+                                <div class="card card-body border-0 shadow-sm rounded-3"
+                                    style="background-color: #f8f9fc; border-left: 4px solid {{ $currentStatus == 'Resuelto' ? '#198754' : '#0d6efd' }} !important;">
+                                    @if (empty($consulta->reply))
+                                        <form action="/admin/consultas/{{ $consulta->id }}/responder" method="POST">
+                                            @csrf
+                                            <div class="mb-3">
+                                                <label class="form-label fw-bold text-primary small">Escribir respuesta a
+                                                    {{ $consulta->name }}:</label>
+                                                <textarea class="form-control" name="reply" rows="3" required placeholder="Escribe aquí la respuesta..."></textarea>
+                                            </div>
+                                            <div class="text-end">
+                                                <button type="submit" class="btn btn-success btn-sm fw-bold px-4"
+                                                    style="border-radius: 6px;">
+                                                    Enviar Respuesta
+                                                </button>
+                                            </div>
+                                        </form>
+                                    @else
+                                        <div>
+                                            <h6 class="fw-bold text-success mb-2">Tu respuesta enviada:</h6>
+                                            <p class="mb-0 text-dark small bg-white p-3 rounded border shadow-sm">
+                                                {{ $consulta->reply }}
+                                            </p>
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
+                            {{-- FIN TARJETA REGISTRADOS --}}
+
                         @empty
                             <div class="text-center py-5 bg-light rounded-3">
                                 <p class="text-muted mb-0">No hay consultas de clientes registrados.</p>
@@ -90,10 +170,87 @@
                     tabindex="0">
                     <div style="max-height: 500px; overflow-y: auto; overflow-x: hidden; padding-right: 5px;">
                         @forelse ($consultasInvitados as $consulta)
-                            @include('partials.admin_consulta_card', [
-                                'consulta' => $consulta,
-                                'esRegistrado' => false,
-                            ])
+                            @php
+                                $currentStatus = $consulta->status ?? 'No leído';
+                            @endphp
+
+                            {{-- DISEÑO DE TARJETA PARA INVITADOS --}}
+                            <div
+                                class="d-flex justify-content-between align-items-center bg-light rounded-3 p-3 mb-2 border-start border-4 {{ $currentStatus == 'No leído' ? 'border-danger' : 'border-success' }}">
+                                <div>
+                                    <div class="d-flex align-items-center gap-2 mb-1">
+                                        <strong class="text-dark fs-5 mb-0">
+                                            {{ $consulta->name ?? 'Usuario' }} {{ $consulta->last_name ?? '' }}
+                                        </strong>
+
+                                        <button onclick="copiarEmail('{{ $consulta->email ?? '' }}')"
+                                            class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1 py-0 px-2 ms-2 shadow-sm"
+                                            title="Copiar correo" style="border-radius: 6px; height: 26px;">
+                                            <span class="small fw-bold">Mail</span>
+                                        </button>
+                                    </div>
+
+                                    <span class="badge bg-secondary mb-1 text-white small">Asunto:
+                                        {{ $consulta->subject ?? 'General' }}</span>
+
+                                    <small class="text-muted d-block" title="{{ $consulta->body }}">
+                                        {{ Str::limit($consulta->body ?? '(Sin cuerpo de mensaje)', 80) }}
+                                    </small>
+                                </div>
+
+                                <div class="d-flex align-items-center gap-3">
+                                    <span
+                                        class="badge {{ $currentStatus == 'No leído' ? 'bg-danger' : 'bg-success' }} px-3 py-2 rounded-3">
+                                        {{ $currentStatus }}
+                                    </span>
+
+                                    @if ($currentStatus !== 'Resuelto')
+                                        <button class="btn btn-sm btn-primary fw-bold px-3" type="button"
+                                            data-bs-toggle="collapse" data-bs-target="#collapseReply{{ $consulta->id }}"
+                                            aria-expanded="false" style="border-radius: 6px;">
+                                            Responder
+                                        </button>
+                                    @else
+                                        <button class="btn btn-sm btn-outline-success fw-bold px-3" type="button"
+                                            data-bs-toggle="collapse" data-bs-target="#collapseReply{{ $consulta->id }}"
+                                            aria-expanded="false" style="border-radius: 6px;">
+                                            Ver respuesta
+                                        </button>
+                                    @endif
+                                </div>
+                            </div>
+
+                            {{-- Desplegable de respuestas --}}
+                            <div class="collapse mb-4" id="collapseReply{{ $consulta->id }}">
+                                <div class="card card-body border-0 shadow-sm rounded-3"
+                                    style="background-color: #f8f9fc; border-left: 4px solid {{ $currentStatus == 'Resuelto' ? '#198754' : '#0d6efd' }} !important;">
+                                    @if (empty($consulta->reply))
+                                        <form action="/admin/consultas/{{ $consulta->id }}/responder" method="POST">
+                                            @csrf
+                                            <div class="mb-3">
+                                                <label class="form-label fw-bold text-primary small">Escribir respuesta a
+                                                    {{ $consulta->name }}:</label>
+                                                <textarea class="form-control" name="reply" rows="3" required placeholder="Escribe aquí la respuesta..."></textarea>
+                                            </div>
+                                            <div class="text-end">
+                                                <button type="submit" class="btn btn-success btn-sm fw-bold px-4"
+                                                    style="border-radius: 6px;">
+                                                    Enviar Respuesta
+                                                </button>
+                                            </div>
+                                        </form>
+                                    @else
+                                        <div>
+                                            <h6 class="fw-bold text-success mb-2">Tu respuesta enviada:</h6>
+                                            <p class="mb-0 text-dark small bg-white p-3 rounded border shadow-sm">
+                                                {{ $consulta->reply }}
+                                            </p>
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
+                            {{-- FIN TARJETA INVITADOS --}}
+
                         @empty
                             <div class="text-center py-5 bg-light rounded-3">
                                 <p class="text-muted mb-0">No hay consultas de visitantes anónimos.</p>
@@ -109,13 +266,11 @@
     {{-- Script para estilo de las pestañas y copiar email --}}
     <script>
         function activarTab(elemento) {
-            // Reiniciar estilos de todos los botones
             let botones = document.querySelectorAll('#consultasTab .nav-link');
             botones.forEach(btn => {
                 btn.classList.remove('border-bottom', 'border-3', 'border-primary', 'text-dark');
                 btn.classList.add('text-muted');
             });
-            // Activar el clickeado
             elemento.classList.remove('text-muted');
             elemento.classList.add('border-bottom', 'border-3', 'border-primary', 'text-dark');
         }

@@ -23,10 +23,7 @@
     @include('partials.navbar')
     {{-- NavBar end --}}
 
-    <!-- Banner de bienvenida -->
-    {{-- Cuerpo --}}
     <section class="hero-quienes-somos position-relative d-flex align-items-center justify-content-center text-center">
-
         {{-- Capa oscura para que el texto resalte (Overlay) --}}
         <div class="overlay-hero"></div>
 
@@ -34,7 +31,6 @@
         <div class="container position-relative" style="z-index: 2;">
             <div class="row justify-content-center">
                 <div class="col-12 col-md-8">
-                    {{-- Un pequeño subtítulo naranja para darle elegancia --}}
                     <h1 class="display-3 fw-bold text-white mb-3">¡Escribinos!</h1>
                     <p class="lead text-white-50 mb-0">
                         Estamos para escucharte. Aquí resolvemos tus dudas sobre envíos, cambios o reclamos de la Tienda
@@ -43,10 +39,7 @@
                 </div>
             </div>
         </div>
-
     </section>
-
-    <!-- Mapa y cards de direcciones -->
 
     <section class="container mb-5 mt-5">
         <div class="row g-4">
@@ -68,7 +61,7 @@
                     <div class="card-body">
                         <h2 class="fw-bold mb-4" style="color: #021A54;">Información de Contacto</h2>
 
-                        {{-- Sección Nueva: Información Legal (Consigna del profesor) --}}
+                        {{-- Sección Nueva: Información Legal --}}
                         <div class="mb-4 p-3 bg-white border rounded shadow-sm">
                             <h5 class="fw-bold mb-3" style="color: #FF6600; font-size: 1.1rem;">Datos Legales</h5>
                             <ul class="list-unstyled text-secondary small mb-0">
@@ -111,7 +104,6 @@
     </section>
 
 
-
     {{-- Ponte en contacto --}}
     <section class="container mb-5 pb-5 mt-0 pt-0 text-center">
 
@@ -128,50 +120,53 @@
             </div>
         @endif
 
-        {{-- CASO 1: SI EL USUARIO ESTÁ LOGUEADO --}}
-        @auth
-            <form id="formContacto" action="/contacto" method="POST" class="text-start mx-auto p-4 shadow-sm rounded"
-                style="max-width: 600px; background-color: #f8f9fa; border-radius: 12px;">
-                @csrf
+        {{-- FORMULARIO UNIFICADO (Para logueados y visitantes) --}}
+        <form id="formContacto" action="/contacto" method="POST" class="text-start mx-auto p-4 shadow-sm rounded"
+            style="max-width: 600px; background-color: #f8f9fa; border-radius: 12px;">
+            @csrf
 
-                {{-- Campo Asunto --}}
+            {{-- Si es un visitante anónimo, le pedimos sus datos para poder responderle --}}
+            @guest
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="name" class="form-label text-secondary fw-bold">Nombre *</label>
+                        <input type="text" class="form-control" id="name" name="name" placeholder="Tu nombre"
+                            required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="last_name" class="form-label text-secondary fw-bold">Apellido *</label>
+                        <input type="text" class="form-control" id="last_name" name="last_name"
+                            placeholder="Tu apellido" required>
+                    </div>
+                </div>
                 <div class="mb-3">
-                    <label for="asunto" class="form-label text-secondary fw-bold">Asunto *</label>
-                    <input type="text" class="form-control" id="asunto" name="asunto"
-                        placeholder="Ej. Problema con mi pedido / Duda de envíos" required>
+                    <label for="email" class="form-label text-secondary fw-bold">Correo Electrónico *</label>
+                    <input type="email" class="form-control" id="email" name="email"
+                        placeholder="ejemplo@correo.com" required>
                 </div>
+            @endguest
 
-                {{-- Campo Mensaje --}}
-                <div class="mb-4">
-                    <label for="mensaje" class="form-label text-secondary fw-bold">Mensaje / Consulta *</label>
-                    <textarea class="form-control" id="mensaje" name="mensaje" rows="5"
-                        placeholder="Escribe detalladamente tu consulta aquí..." required></textarea>
-                </div>
-
-                <div class="text-center">
-                    <button type="submit" class="btn btn-lg px-5 py-3 fw-bold text-white shadow w-100"
-                        style="background-color: #FF6600; border-radius: 50px; border: none; transition: 0.3s;">
-                        Enviar Mensaje
-                    </button>
-                </div>
-            </form>
-        @endauth
-
-        {{-- CASO 2: SI EL USUARIO ES UN INVITADO (NO LOGUEADO) --}}
-        @guest
-            <div class="text-center mx-auto p-5 shadow-sm border"
-                style="max-width: 600px; background-color: #f8f9fa; border-radius: 12px;">
-                <span class="material-symbols-rounded mb-3" style="font-size: 4rem; color: #021A54;">lock_open</span>
-                <h4 class="fw-bold mb-2" style="color: #021A54;">¿Deseas enviarnos un mensaje?</h4>
-                <p class="text-secondary mb-4 mx-auto" style="max-width: 400px;">
-                    Para mantener la seguridad de la tienda y darte una atención personalizada, necesitas iniciar sesión.
-                </p>
-                <a href="/login" class="btn btn-lg px-5 py-2 fw-bold text-white shadow-sm"
-                    style="background-color: #021A54; border-radius: 50px; border: none; transition: 0.3s;">
-                    Iniciar Sesión
-                </a>
+            {{-- Campo Asunto --}}
+            <div class="mb-3">
+                <label for="asunto" class="form-label text-secondary fw-bold">Asunto *</label>
+                <input type="text" class="form-control" id="asunto" name="asunto"
+                    placeholder="Ej. Problema con mi pedido / Duda de envíos" required>
             </div>
-        @endguest
+
+            {{-- Campo Mensaje --}}
+            <div class="mb-4">
+                <label for="mensaje" class="form-label text-secondary fw-bold">Mensaje / Consulta *</label>
+                <textarea class="form-control" id="mensaje" name="mensaje" rows="5"
+                    placeholder="Escribe detalladamente tu consulta aquí..." required></textarea>
+            </div>
+
+            <div class="text-center">
+                <button type="submit" class="btn btn-lg px-5 py-3 fw-bold text-white shadow w-100"
+                    style="background-color: #FF6600; border-radius: 50px; border: none; transition: 0.3s;">
+                    Enviar Mensaje
+                </button>
+            </div>
+        </form>
 
     </section>
 
@@ -189,7 +184,6 @@
 
                 {{-- Cuerpo del Modal --}}
                 <div class="modal-body text-center p-5">
-                    {{-- Usando el icono de Material Symbols que ya tenías en tu head --}}
                     <span class="material-symbols-rounded mb-3" style="font-size: 5rem; color: #FF6600;">
                         check_circle
                     </span>
