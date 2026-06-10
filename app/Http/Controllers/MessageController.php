@@ -9,15 +9,22 @@ class MessageController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Message::query();
-
+        // 1. Consultas de Usuarios Registrados (Tienen user_id)
+        $queryRegistrados = Message::whereNotNull('user_id');
         if ($request->has('estado') && $request->estado != '') {
-            $query->where('status', $request->estado);
+            $queryRegistrados->where('status', $request->estado);
         }
+        $consultasRegistrados = $queryRegistrados->latest()->get();
 
-        $consultas = $query->latest()->get();
+        // 2. Consultas de Visitantes / No Registrados (NO tienen user_id)
+        $queryInvitados = Message::whereNull('user_id');
+        if ($request->has('estado') && $request->estado != '') {
+            $queryInvitados->where('status', $request->estado);
+        }
+        $consultasInvitados = $queryInvitados->latest()->get();
 
-        return view('admin.consultas', compact('consultas'));
+        // 3. Enviamos ambas listas a la vista
+        return view('admin.consultas', compact('consultasRegistrados', 'consultasInvitados'));
     }
 
     public function updateStatus(Request $request, $id)

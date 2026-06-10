@@ -15,11 +15,31 @@ class OrderController extends Controller
     // SECCIÓN DEL CLIENTE (Checkout)
     // ==========================================
 
-    // 1. Mostrar la pantalla de Checkout
+    // 1. Mostrar la pantalla de Checkout con limpieza de carrito
     public function checkout()
     {
         $cart = session()->get('cart', []);
         
+        // Limpiamos los eliminados antes de dejarlo pagar
+        if (count($cart) > 0) {
+            $idsEnCarrito = array_keys($cart);
+            $productosActivos = Product::whereIn('id', $idsEnCarrito)->pluck('id')->toArray();
+            $cartModificado = false;
+
+            foreach ($cart as $id => $details) {
+                if (!in_array($id, $productosActivos)) {
+                    unset($cart[$id]);
+                    $cartModificado = true;
+                }
+            }
+
+            if ($cartModificado) {
+                session()->put('cart', $cart);
+                // Si le sacamos algo, lo mandamos de vuelta al carrito para que vea el nuevo precio total
+                return redirect('/carrito')->with('warning', 'Un producto que tenías en el carrito fue retirado del catálogo. Revisa tu nuevo total antes de continuar.');
+            }
+        }
+
         if (count($cart) == 0) {
             return redirect('/productos')->with('error', 'Tu carrito está vacío.');
         }
@@ -62,7 +82,12 @@ class OrderController extends Controller
             ]);
 
             foreach ($cart as $id => $details) {
-                $producto = Product::lockForUpdate()->findOrFail($id);
+                // Usamos find() en lugar de findOrFail para atrapar a los fantasmas con un mensaje personalizado
+                $producto = Product::lockForUpdate()->find($id);
+
+                if (!$producto) {
+                    throw new \Exception("Lo sentimos, el producto '{$details['name']}' fue retirado del catálogo justo antes de tu pago. Revisa tu carrito.");
+                }
 
                 if ($producto->stock < $details['quantity']) {
                     throw new \Exception("Lo sentimos, nos quedamos sin stock de {$producto->name} mientras procesabas el pago.");
@@ -97,38 +122,43 @@ class OrderController extends Controller
     // 3. Mostrar la lista de pedidos en el panel Admin (con búsqueda y filtros)
     public function adminIndex(Request $request)
     {
-        // Le quitamos el orderBy por defecto de acá para que sea dinámico
-        $query = Order::with(['user', 'items.product']);
+        // 1. CONSULTA PRINCIPAL: Solo pedidos que NO estén entregados
+        $query = Order::with(['user', 'items.product'])->where('status', '!=', 'entregado');
 
-        // Si el admin escribió algo en el buscador
+        // Búsqueda por número
         if ($request->filled('search')) {
             $search = str_replace('#', '', $request->search);
             $query->where('id', 'like', "%{$search}%");
         }
 
-        // Si el admin filtró por estado
+        // Filtro por estado
         if ($request->filled('status') && $request->status != 'Todos los estados') {
             $statusDb = str_replace(' ', '_', strtolower($request->status));
             $query->where('status', $statusDb);
         }
 
-        // NUEVO: Si el admin filtró por valor total (Mayor o Menor)
+        // Filtro por valor total
         if ($request->filled('sort_total')) {
             if ($request->sort_total == 'desc') {
-                $query->orderBy('total', 'desc'); // Los más caros primero
+                $query->orderBy('total', 'desc'); 
             } elseif ($request->sort_total == 'asc') {
-                $query->orderBy('total', 'asc'); // Los más baratos primero
+                $query->orderBy('total', 'asc'); 
             }
         } else {
-            // Orden por defecto: los pedidos más nuevos arriba de todo
             $query->orderBy('created_at', 'desc');
         }
 
-        // El appends(request()->query()) asegura que si el admin pasa a la página 2, 
-        // no se pierdan los filtros aplicados (estado, búsqueda o precio)
         $pedidos = $query->paginate(15)->appends(request()->query());
 
-        return view('admin.pedidos', compact('pedidos'));
+        // 2. CONSULTA SECUNDARIA: Pedidos Entregados (Historial para el acordeón)
+        // Usamos limit(100) como buena práctica para no colapsar la memoria si tenés miles de ventas
+        $pedidosEntregados = Order::with(['user', 'items.product'])
+            ->where('status', 'entregado')
+            ->orderBy('updated_at', 'desc')
+            ->limit(100) 
+            ->get();
+
+        return view('admin.pedidos', compact('pedidos', 'pedidosEntregados'));
     }
 
     // 4. Actualizar el estado de un pedido al instante

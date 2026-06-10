@@ -7,11 +7,34 @@ use App\Models\Product;
 
 class CartController extends Controller
 {
-    // 1. Mostrar la vista del carrito con los productos seleccionados
+    // 1. Mostrar la vista del carrito con limpieza automática de eliminados
     public function index()
     {
-        // Traemos el carrito de la sesión (si no existe, devuelve un array vacío)
         $cart = session()->get('cart', []);
+        $cartModificado = false;
+
+        if (count($cart) > 0) {
+            // Obtenemos todos los IDs que el cliente tiene en su carrito
+            $idsEnCarrito = array_keys($cart);
+            
+            // Buscamos en la base de datos cuáles de esos IDs siguen "vivos" (no eliminados)
+            $productosActivos = Product::whereIn('id', $idsEnCarrito)->pluck('id')->toArray();
+
+            // Recorremos el carrito. Si un ID no está en los activos, lo borramos de la sesión.
+            foreach ($cart as $id => $details) {
+                if (!in_array($id, $productosActivos)) {
+                    unset($cart[$id]);
+                    $cartModificado = true;
+                }
+            }
+
+            // Si tuvimos que limpiar algún producto, guardamos los cambios y avisamos
+            if ($cartModificado) {
+                session()->put('cart', $cart);
+                session()->flash('warning', 'Atención: Algunos productos de tu carrito ya no están disponibles en la tienda y fueron retirados automáticamente.');
+            }
+        }
+
         return view('carrito', compact('cart'));
     }
 
@@ -64,6 +87,7 @@ class CartController extends Controller
         
         return redirect()->back()->with('success', "¡Se agregaron $requestedQuantity unidad(es) de {$producto->name} al carrito!");
     }
+
     // 3. Quitar un producto específico del carrito
     public function remove($id)
     {

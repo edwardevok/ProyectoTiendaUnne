@@ -81,6 +81,7 @@
                             <th class="text-muted small py-3 text-start ps-4">Imagen</th>
                             <th class="text-muted small py-3 text-start">Producto</th>
                             <th class="text-muted small py-3">Categoría</th>
+                            <th class="text-muted small py-3">Ventas</th> {{-- NUEVA COLUMNA DE VENTAS --}}
                             <th class="text-muted small py-3">Stock</th>
                             <th class="text-muted small py-3">Precio</th>
                             <th class="text-muted small py-3 text-end pe-4">Acciones</th>
@@ -104,12 +105,19 @@
                                 <td class="py-3 fw-bold text-start text-dark">{{ $producto->name }}</td>
                                 <td class="py-3 text-muted">
                                     {{ $producto->category ? $producto->category->name : 'Sin categoría' }}</td>
+
+                                {{-- NUEVA CELDA: TOTAL DE VENTAS --}}
+                                <td class="py-3 fw-bold text-success">
+                                    {{ $producto->items_sum_quantity ?? 0 }} unid.
+                                </td>
+
                                 <td class="py-3">
                                     {{-- Etiqueta visual de stock --}}
                                     @if ($producto->stock == 0)
                                         <span
                                             class="badge bg-danger bg-opacity-10 text-danger border border-danger-subtle px-2 py-1">Agotado
-                                            (0)</span>
+                                            (0)
+                                        </span>
                                     @elseif($producto->stock <= 5)
                                         <span
                                             class="badge bg-warning bg-opacity-10 text-warning-emphasis border border-warning-subtle px-2 py-1">Poco
@@ -138,7 +146,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="text-center py-5 text-muted">No hay productos que coincidan con la
+                                <td colspan="7" class="text-center py-5 text-muted">No hay productos que coincidan con la
                                     búsqueda.</td>
                             </tr>
                         @endforelse

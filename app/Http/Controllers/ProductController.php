@@ -7,13 +7,12 @@ use App\Models\Product;
 
 class ProductController extends Controller
 {
-    // 1. Mostrar la lista de todos los productos en el panel admin
     public function index(Request $request)
     {
         $categorias = \App\Models\Category::all();
 
-        // Empezamos la consulta
-        $query = \App\Models\Product::with('category');
+        // NUEVO: Agregamos withSum para que sume las unidades vendidas directamente en la BD
+        $query = \App\Models\Product::with('category')->withSum('items', 'quantity');
 
         // Búsqueda por texto
         if ($request->filled('search')) {
@@ -25,25 +24,24 @@ class ProductController extends Controller
             $query->where('category_id', $request->category_id);
         }
 
-        // NUEVO: Ordenamiento 1 - Por Precio
+        // Ordenamiento 1 - Por Precio
         if ($request->filled('sort_price')) {
-            $query->orderBy('price', $request->sort_price); // 'desc' o 'asc'
+            $query->orderBy('price', $request->sort_price); 
         }
 
-        // NUEVO: Ordenamiento 2 - Por Stock (Totalmente acumulable con el precio)
+        // Ordenamiento 2 - Por Stock 
         if ($request->filled('sort_stock')) {
-            $query->orderBy('stock', $request->sort_stock); // 'desc' o 'asc'
+            $query->orderBy('stock', $request->sort_stock); 
         }
 
-        // Orden por defecto: Solo se aplica si el admin NO seleccionó precio ni stock
+        // Orden por defecto
         if (!$request->filled('sort_price') && !$request->filled('sort_stock')) {
             $query->orderBy('id', 'desc');
         }
 
-        // Traemos los productos listos
         $productos = $query->get();
 
-        // Productos Inactivos (ocultos por SoftDeletes)
+        // A los inactivos no hace falta calcularles las ventas para esta vista, pero podés agregarlo si quisieras
         $productosInactivos = \App\Models\Product::onlyTrashed()->orderBy('deleted_at', 'desc')->get();
 
         return view('admin.productos', compact('productos', 'categorias', 'productosInactivos'));
@@ -88,7 +86,7 @@ class ProductController extends Controller
     public function destroy($id)
     {
         $producto = Product::findOrFail($id);
-        $producto->delete(); // SoftDelete
+        $producto->delete(); 
 
         return redirect('/admin/productos')->with('success', 'Producto desactivado correctamente.');
     }
