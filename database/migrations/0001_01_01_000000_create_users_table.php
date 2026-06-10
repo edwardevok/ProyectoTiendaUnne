@@ -14,11 +14,14 @@ return new class extends Migration
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('last_name'); // <-- Nuevo campo para el apellido del usuario
+            $table->string('last_name')->nullable(); 
             $table->string('email')->unique();
-            $table->string('role')->default('cliente');
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->string('role')->default('cliente'); 
+            
+            $table->boolean('is_active')->default(true); 
+            
             $table->rememberToken();
             $table->timestamps();
         });
@@ -38,6 +41,7 @@ return new class extends Migration
             $table->integer('last_activity')->index();
         });
     }
+
     /**
      * Reverse the migrations.
      */

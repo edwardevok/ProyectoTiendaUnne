@@ -13,7 +13,8 @@ use Illuminate\Database\Eloquent\SoftDeletes; // 1. IMPORTAMOS SOFTDELETES
 use App\Models\Order;
 use App\Models\Message;
 
-#[Fillable(['name', 'last_name', 'email', 'password', 'role'])]
+// 👇 ACÁ AGREGAMOS 'is_active' AL FINAL DEL ARRAY
+#[Fillable(['name', 'last_name', 'email', 'password', 'role', 'is_active'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
