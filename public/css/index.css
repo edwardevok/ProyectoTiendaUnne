@@ -251,37 +251,17 @@
 .btn-embla-prev { left: -20px; }
 .btn-embla-next { right: -20px; }
 
-/* --- Ajuste del tamaño de las fotos (Mobile First) --- */
-/* --- Ajuste del tamaño de las fotos (Escala de 3 niveles) --- */
-
-/* 1. Celulares (Queda chico y prolijo) */
+/* La caja de foto llena el ancho disponible del slide en todas las pantallas */
 .contenedor-foto-producto {
-    max-width: 220px; 
-    margin: 0 auto; 
-    aspect-ratio: 1 / 1; 
+    width: 100%;
+    aspect-ratio: 1 / 1;
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
 .contenedor-foto-producto img {
-    max-height: 90%; 
-    max-width: 90%;
-    object-fit: contain; 
-}
-
-/* 2. Tablets (2 productos por fila) */
-@media (min-width: 768px) {
-    .contenedor-foto-producto {
-        max-width: 220px; /* Aumentamos para tablet */
-    }
-}
-
-/* 3. Computadoras (3 productos por fila) */
-@media (min-width: 992px) {
-    .contenedor-foto-producto {
-        /* ¡Acá le damos el tamaño grande para escritorio! */
-        /* Podés subirlo a 280px o 300px si las querés aún más imponentes */
-        max-width: 300px; 
-    }
+    max-height: 85%;
+    max-width: 85%;
+    object-fit: contain;
 }

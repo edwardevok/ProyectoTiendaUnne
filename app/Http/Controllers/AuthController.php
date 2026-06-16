@@ -9,20 +9,14 @@ use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
-    // --- LÓGICA DE REGISTRO ---
     public function register(Request $request)
     {
-        // 1. Validaciones estrictas con seguridad de contraseña y mensajes separados
         $request->validate([
-            'name' => 'required|string|max:255',
+            'name'      => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
-            'email' => 'required|string|email:filter|max:255|unique:users', 
-            'password' => [
-                'required',
-                'string',
-                'min:8',
-                'confirmed',
-                // Nuestro validador personalizado (Closure)
+            'email'     => 'required|string|email:filter|max:255|unique:users',
+            'password'  => [
+                'required', 'string', 'min:8', 'confirmed',
                 function ($attribute, $value, $fail) {
                     if (!preg_match('/[A-Z]/', $value)) {
                         $fail('A tu contraseña le falta al menos una letra MAYÚSCULA.');
@@ -36,73 +30,73 @@ class AuthController extends Controller
                 },
             ],
         ], [
-            // Mensajes de error personalizados en español para las reglas generales
-            'email.email' => 'El correo debe tener un formato válido (ej: tu@email.com).',
-            'email.unique' => 'Este correo ya está registrado en la tienda.',
-            'password.min' => 'La contraseña debe tener al menos 8 caracteres.',
+            'email.email'    => 'El correo debe tener un formato válido (ej: tu@email.com).',
+            'email.unique'   => 'Este correo ya está registrado en la tienda.',
+            'password.min'   => 'La contraseña debe tener al menos 8 caracteres.',
             'password.confirmed' => 'Las contraseñas no coinciden.',
         ]);
 
-        // 2. Crear el usuario (La contraseña se encripta con Hash::make)
-        $user = User::create([
-            'name' => $request->name,
-            'last_name' => $request->last_name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password), 
-            'role' => 'cliente', 
-        ]);
+        $user = User::registrar($request->only('name', 'last_name', 'email', 'password'));
 
-        // 3. Iniciar sesión automáticamente y redirigir
         Auth::login($user);
         return redirect('/index');
     }
 
-    // --- LÓGICA DE LOGIN ---
     public function login(Request $request)
     {
-        // 1. Validamos que el usuario haya escrito algo
         $request->validate([
-            'email' => ['required', 'email:filter'],
+            'email'    => ['required', 'email:filter'],
             'password' => ['required'],
         ]);
 
-        // 2. Buscamos al usuario en la base de datos por su correo
         $user = User::where('email', $request->email)->first();
 
-        // 3. Verificamos si el correo NO existe
-        if (!$user) {
+        // Mensaje unificado para evitar user enumeration (no revelar si el email existe o no)
+        if (!$user || !Hash::check($request->password, $user->password)) {
             return back()->withErrors([
-                'email' => 'El correo ingresado no está registrado.',
-            ])->onlyInput('email'); // Mantiene el email escrito
+                'email' => 'Las credenciales ingresadas no coinciden con nuestros registros.',
+            ])->onlyInput('email');
         }
 
-        // 4. Si el correo existe, verificamos si la contraseña NO coincide
-        if (!Hash::check($request->password, $user->password)) {
+        if (!$user->is_active) {
             return back()->withErrors([
-                'password' => 'La contraseña ingresada es incorrecta.',
-            ])->onlyInput('email'); // Mantiene el email escrito
+                'email' => 'Tu cuenta está desactivada. Contactate con soporte.',
+            ])->onlyInput('email');
         }
 
-        // 5. Si pasamos los dos controles anteriores, iniciamos sesión
         Auth::login($user);
         $request->session()->regenerate();
 
-        // Verificamos el rol para redirigir
-        if ($user->role === 'admin') {
-            return redirect()->intended('/admin/dashboard');
+        // Restaurar carrito guardado en la BD y mergearlo con el de la sesión actual.
+        // json_decode devuelve claves string ("15"), la sesión usa claves int (15).
+        // Normalizamos a int y usamos + (no array_merge) para preservar las claves.
+        $cartSesion      = session()->get('cart', []);
+        $cartGuardadoRaw = $user->cart ? json_decode($user->cart, true) : [];
+        $cartGuardado    = [];
+        foreach ($cartGuardadoRaw as $id => $item) {
+            $cartGuardado[(int) $id] = $item;
+        }
+        // + preserva claves; la sesión (izquierda) tiene prioridad sobre la BD (derecha).
+        $cartFinal = $cartSesion + $cartGuardado;
+        if (!empty($cartFinal)) {
+            session()->put('cart', $cartFinal);
         }
 
-        return redirect()->intended('/index');
+        return redirect()->intended($user->esAdmin() ? '/admin/dashboard' : '/index');
     }
 
-    // --- LÓGICA DE LOGOUT ---
     public function logout(Request $request)
     {
+        // Guardar el carrito en la BD antes de destruir la sesión.
+        if (Auth::check()) {
+            $user       = Auth::user();
+            $user->cart = json_encode(session()->get('cart', []));
+            $user->save();
+        }
+
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-        
-        // Al cerrar sesión, también lo mandamos al catálogo
         return redirect('/index');
     }
 }

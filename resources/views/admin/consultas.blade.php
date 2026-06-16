@@ -27,16 +27,16 @@
     @endif
 
     {{-- Filtro de Estado Superior --}}
-    <form action="/admin/consultas" method="GET" class="mb-4 d-flex gap-3 align-items-center">
-        <select name="estado" class="form-select border-0 shadow-sm" style="max-width: 250px; border-radius: 8px;"
-            onchange="this.form.submit()">
+    <form action="/admin/consultas" method="GET" class="mb-4 d-flex flex-wrap gap-2 align-items-center">
+        <select name="estado" class="form-select border-0 shadow-sm rounded-3"
+            style="max-width: 250px;" onchange="this.form.submit()">
             <option value="">Todos los estados</option>
             <option value="No leído" {{ request('estado') == 'No leído' ? 'selected' : '' }}>No leído</option>
             <option value="Resuelto" {{ request('estado') == 'Resuelto' ? 'selected' : '' }}>Resuelto</option>
         </select>
 
         @if (request('estado'))
-            <a href="/admin/consultas" class="btn btn-outline-danger fw-bold" style="border-radius: 8px;">Limpiar filtro</a>
+            <a href="/admin/consultas" class="btn btn-outline-danger fw-bold rounded-3">Limpiar filtro</a>
         @endif
     </form>
 
@@ -79,7 +79,7 @@
 
                             {{-- DISEÑO DE TARJETA PARA REGISTRADOS --}}
                             <div
-                                class="d-flex justify-content-between align-items-center bg-light rounded-3 p-3 mb-2 border-start border-4 {{ $currentStatus == 'No leído' ? 'border-danger' : 'border-success' }}">
+                                class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-3 bg-light rounded-3 p-3 mb-2 border-start border-4 {{ $currentStatus == 'No leído' ? 'border-danger' : 'border-success' }}">
                                 <div>
                                     <div class="d-flex align-items-center gap-2 mb-1">
                                         <strong class="text-dark fs-5 mb-0">
@@ -104,7 +104,7 @@
                                     </small>
                                 </div>
 
-                                <div class="d-flex align-items-center gap-3">
+                                <div class="d-flex align-items-center gap-3 flex-shrink-0">
                                     <span
                                         class="badge {{ $currentStatus == 'No leído' ? 'bg-danger' : 'bg-success' }} px-3 py-2 rounded-3">
                                         {{ $currentStatus }}
@@ -176,7 +176,7 @@
 
                             {{-- DISEÑO DE TARJETA PARA INVITADOS --}}
                             <div
-                                class="d-flex justify-content-between align-items-center bg-light rounded-3 p-3 mb-2 border-start border-4 {{ $currentStatus == 'No leído' ? 'border-danger' : 'border-success' }}">
+                                class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-3 bg-light rounded-3 p-3 mb-2 border-start border-4 {{ $currentStatus == 'No leído' ? 'border-danger' : 'border-success' }}">
                                 <div>
                                     <div class="d-flex align-items-center gap-2 mb-1">
                                         <strong class="text-dark fs-5 mb-0">
@@ -198,7 +198,7 @@
                                     </small>
                                 </div>
 
-                                <div class="d-flex align-items-center gap-3">
+                                <div class="d-flex align-items-center gap-3 flex-shrink-0">
                                     <span
                                         class="badge {{ $currentStatus == 'No leído' ? 'bg-danger' : 'bg-success' }} px-3 py-2 rounded-3">
                                         {{ $currentStatus }}

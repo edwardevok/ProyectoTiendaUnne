@@ -112,7 +112,7 @@
             </div>
 
             <div class="col-6 col-lg-3">
-                <a href="/productos?categoria=hogar" class="categoria-cuadrado"
+                <a href="/productos?categoria=bazar" class="categoria-cuadrado"
                     style="background-image: url('{{ asset('img/hogar.png') }}');">
                     <div class="categoria-overlay">
                         <span class="material-symbols-rounded mb-2">water_bottle</span>
@@ -132,112 +132,54 @@
             <div class="embla" id="emblaDestacados">
                 <div class="embla__container">
 
-                    {{-- Producto 1: Mate --}}
-                    <div class="embla__slide">
-                        <div class="card border-0 product-card bg-transparent text-center h-100 d-flex flex-column">
-                            <div class="contenedor-foto-producto shadow-sm mb-3 bg-white rounded p-2">
-                                <img src="{{ asset('img/mate.png') }}" class="img-fluid" alt="Mate UNNE">
-                            </div>
-                            <h6 class="text-muted fw-bold">Mate UNNE</h6>
-                            <p class="precio-producto text-success fw-bold mb-3">$18.000,00</p>
+                    @forelse ($destacados as $producto)
+                        <div class="embla__slide">
+                            <div class="card border-0 product-card bg-transparent text-center h-100 d-flex flex-column">
+                                <div class="contenedor-foto-producto shadow-sm mb-3 bg-white rounded p-2">
+                                    @if ($producto->image)
+                                        <img src="{{ asset('img/' . $producto->image) }}" class="img-fluid"
+                                            alt="{{ $producto->name }}">
+                                    @else
+                                        <div class="d-flex align-items-center justify-content-center h-100 text-muted">
+                                            Sin imagen
+                                        </div>
+                                    @endif
+                                </div>
+                                <h6 class="text-muted fw-bold">{{ $producto->name }}</h6>
+                                <p class="precio-producto text-success fw-bold mb-3">
+                                    $ {{ number_format($producto->price, 0, ',', '.') }}
+                                </p>
 
-                            {{-- Botón Agregar al Carrito --}}
-                            <div class="mt-auto">
-                                <a href="{{ url('/paginaenconstruccion') }} "
-                                    class="btn btn-naranja w-100 d-flex align-items-center justify-content-center gap-2"
-                                    style="padding: 10px;">
-                                    <span class="material-symbols-rounded"
-                                        style="font-size: 1.2rem;">shopping_cart</span>
-                                    Agregar
-                                </a>
+                                <div class="mt-auto">
+                                    @auth
+                                        <form action="/carrito/agregar/{{ $producto->id }}" method="POST">
+                                            @csrf
+                                            <input type="hidden" name="quantity" value="1">
+                                            <button type="submit"
+                                                class="btn btn-naranja w-100 d-flex align-items-center justify-content-center gap-2"
+                                                style="padding: 10px;">
+                                                <span class="material-symbols-rounded"
+                                                    style="font-size: 1.2rem;">shopping_cart</span>
+                                                Agregar
+                                            </button>
+                                        </form>
+                                    @else
+                                        <a href="/login"
+                                            class="btn btn-naranja w-100 d-flex align-items-center justify-content-center gap-2"
+                                            style="padding: 10px;">
+                                            <span class="material-symbols-rounded"
+                                                style="font-size: 1.2rem;">shopping_cart</span>
+                                            Agregar
+                                        </a>
+                                    @endauth
+                                </div>
                             </div>
                         </div>
-                    </div>
-
-                    {{-- Producto 2: Paraguas --}}
-                    <div class="embla__slide">
-                        <div class="card border-0 product-card bg-transparent text-center h-100 d-flex flex-column">
-                            <div class="contenedor-foto-producto shadow-sm mb-3 bg-white rounded p-2">
-                                <img src="{{ asset('img/paraguas.png') }}" class="img-fluid"
-                                    alt="Paraguas Institucional">
-                            </div>
-                            <h6 class="text-muted fw-bold">Paraguas Institucional</h6>
-                            <p class="precio-producto text-success fw-bold mb-3">$27.000,00</p>
-
-                            <div class="mt-auto">
-                                <a href="{{ url('/paginaenconstruccion') }}"
-                                    class="btn btn-naranja w-100 d-flex align-items-center justify-content-center gap-2"
-                                    style="padding: 10px;">
-                                    <span class="material-symbols-rounded"
-                                        style="font-size: 1.2rem;">shopping_cart</span>
-                                    Agregar
-                                </a>
-                            </div>
+                    @empty
+                        <div class="embla__slide">
+                            <p class="text-muted text-center py-4">Próximamente habrá productos disponibles.</p>
                         </div>
-                    </div>
-
-                    {{-- Producto 3: Taza --}}
-                    <div class="embla__slide">
-                        <div class="card border-0 product-card bg-transparent text-center h-100 d-flex flex-column">
-                            <div class="contenedor-foto-producto shadow-sm mb-3 bg-white rounded p-2">
-                                <img src="{{ asset('img/taza.png') }}" class="img-fluid" alt="Taza Clásica">
-                            </div>
-                            <h6 class="text-muted fw-bold">Taza Clásica</h6>
-                            <p class="precio-producto text-success fw-bold mb-3">$8.500,00</p>
-
-                            <div class="mt-auto">
-                                <a href="{{ url('/paginaenconstruccion') }}"
-                                    class="btn btn-naranja w-100 d-flex align-items-center justify-content-center gap-2"
-                                    style="padding: 10px;">
-                                    <span class="material-symbols-rounded"
-                                        style="font-size: 1.2rem;">shopping_cart</span>
-                                    Agregar
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-
-                    {{-- Producto 4: Buzo --}}
-                    <div class="embla__slide">
-                        <div class="card border-0 product-card bg-transparent text-center h-100 d-flex flex-column">
-                            <div class="contenedor-foto-producto shadow-sm mb-3 bg-white rounded p-2">
-                                <img src="{{ asset('img/buzo.png') }}" class="img-fluid" alt="Buzo Canguro">
-                            </div>
-                            <h6 class="text-muted fw-bold">Buzo Canguro</h6>
-                            <p class="precio-producto text-success fw-bold mb-3">$45.000,00</p>
-
-                            <div class="mt-auto">
-                                <a href="{{ url('/paginaenconstruccion') }}"
-                                    class="btn btn-naranja w-100 d-flex align-items-center justify-content-center gap-2"
-                                    style="padding: 10px;">
-                                    <span class="material-symbols-rounded"
-                                        style="font-size: 1.2rem;">shopping_cart</span>
-                                    Agregar
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-
-                    {{-- Producto 5: Mochila --}}
-                    <div class="embla__slide">
-                        <div class="card border-0 product-card bg-transparent text-center h-100 d-flex flex-column">
-                            <div class="contenedor-foto-producto shadow-sm mb-3 bg-white rounded p-2">
-                                <img src="{{ asset('img/mochila.png') }}" class="img-fluid" alt="Mochila Urbana">
-                            </div>
-                            <h6 class="text-muted fw-bold">Mochila Urbana</h6>
-                            <p class="precio-producto text-success fw-bold mb-3">$32.000,00</p>
-
-                            <div class="mt-auto">
-                                <a href="{{ url('/paginaenconstruccion') }}"
-                                    class="btn btn-naranja w-100 d-flex align-items-center justify-content-center gap-2"
-                                    style="padding: 10px;">
-                                    <span class="material-symbols-rounded"
-                                        style="font-size: 1.2rem;">shopping_cart</span>
-                                    Agregar
-                                </a>
-                            </div>
-                        </div>
-                    </div>
+                    @endforelse
 
                 </div>
             </div>

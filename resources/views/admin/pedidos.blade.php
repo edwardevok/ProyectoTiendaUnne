@@ -24,37 +24,41 @@
         <div class="card-body p-4">
 
             {{-- Buscador y Filtros dinámicos --}}
-            <form action="/admin/pedidos" method="GET" class="d-flex flex-wrap gap-3 mb-4">
-                <input type="text" name="search" class="form-control border shadow-sm"
-                    placeholder="Buscar pedido por Nro (#)" style="width: 250px; border-radius: 8px;"
-                    value="{{ request('search') }}">
+            <form action="/admin/pedidos" method="GET" class="mb-4">
+                <div class="row g-2">
+                    <div class="col-12 col-md-4 col-lg-3">
+                        <input type="text" name="search"
+                            class="form-control border shadow-sm rounded-3 w-100"
+                            placeholder="Buscar pedido por Nro (#)"
+                            value="{{ request('search') }}">
+                    </div>
 
-                <select name="status" class="form-select border shadow-sm" style="width: 200px; border-radius: 8px;"
-                    onchange="this.form.submit()">
-                    <option value="Todos los estados" {{ request('status') == 'Todos los estados' ? 'selected' : '' }}>Todos
-                        los estados activos</option>
-                    <option value="pendiente" {{ request('status') == 'pendiente' ? 'selected' : '' }}>Pendiente</option>
-                    <option value="en_preparacion" {{ request('status') == 'en_preparacion' ? 'selected' : '' }}>En
-                        Preparación</option>
-                    <option value="listo_para_retirar" {{ request('status') == 'listo_para_retirar' ? 'selected' : '' }}>
-                        Listo para retirar</option>
-                    <option value="enviado" {{ request('status') == 'enviado' ? 'selected' : '' }}>Enviado</option>
-                </select>
+                    <div class="col-12 col-md-3 col-lg-2">
+                        <select name="status" class="form-select border shadow-sm rounded-3 w-100"
+                            onchange="this.form.submit()">
+                            <option value="Todos los estados" {{ request('status') == 'Todos los estados' ? 'selected' : '' }}>Todos los estados</option>
+                            <option value="pendiente"          {{ request('status') == 'pendiente'          ? 'selected' : '' }}>Pendiente</option>
+                            <option value="en_preparacion"     {{ request('status') == 'en_preparacion'     ? 'selected' : '' }}>En Preparación</option>
+                            <option value="listo_para_retirar" {{ request('status') == 'listo_para_retirar' ? 'selected' : '' }}>Listo para retirar</option>
+                            <option value="enviado"            {{ request('status') == 'enviado'            ? 'selected' : '' }}>Enviado</option>
+                        </select>
+                    </div>
 
-                <select name="sort_total" class="form-select border shadow-sm" style="width: 200px; border-radius: 8px;"
-                    onchange="this.form.submit()">
-                    <option value="" {{ request('sort_total') == '' ? 'selected' : '' }}>Ordenar por total</option>
-                    <option value="desc" {{ request('sort_total') == 'desc' ? 'selected' : '' }}>Mayor valor primero
-                    </option>
-                    <option value="asc" {{ request('sort_total') == 'asc' ? 'selected' : '' }}>Menor valor primero
-                    </option>
-                </select>
+                    <div class="col-12 col-md-3 col-lg-2">
+                        <select name="sort_total" class="form-select border shadow-sm rounded-3 w-100"
+                            onchange="this.form.submit()">
+                            <option value=""     {{ request('sort_total') == ''     ? 'selected' : '' }}>Por orden</option>
+                            <option value="desc" {{ request('sort_total') == 'desc' ? 'selected' : '' }}>Mayor valor primero</option>
+                            <option value="asc"  {{ request('sort_total') == 'asc'  ? 'selected' : '' }}>Menor valor primero</option>
+                        </select>
+                    </div>
 
-                {{-- Botón de limpiar filtros --}}
-                @if (request('search') || (request('status') && request('status') != 'Todos los estados') || request('sort_total'))
-                    <a href="/admin/pedidos" class="btn btn-light border shadow-sm fw-bold"
-                        style="border-radius: 8px;">Limpiar</a>
-                @endif
+                    @if (request('search') || (request('status') && request('status') != 'Todos los estados') || request('sort_total'))
+                        <div class="col-12 col-md-auto">
+                            <a href="/admin/pedidos" class="btn btn-light border shadow-sm fw-bold rounded-3 w-100">Limpiar</a>
+                        </div>
+                    @endif
+                </div>
             </form>
 
             <h5 class="fw-bold mb-4">Gestión de pedidos en curso</h5>

@@ -14,7 +14,7 @@
     {{-- Fila de Tarjetas de Estadísticas --}}
     <div class="row mb-4">
         {{-- Tarjeta 1 --}}
-        <div class="col-md-3 mb-3 mb-md-0">
+        <div class="col-6 col-md-3 mb-3 mb-md-0">
             <div class="card border-0 shadow-sm rounded-4 h-100">
                 <div class="card-body d-flex justify-content-between align-items-center">
                     <div>
@@ -27,7 +27,7 @@
         </div>
 
         {{-- Tarjeta 2 --}}
-        <div class="col-md-3 mb-3 mb-md-0">
+        <div class="col-6 col-md-3 mb-3 mb-md-0">
             <div class="card border-0 shadow-sm rounded-4 h-100">
                 <div class="card-body d-flex justify-content-between align-items-center">
                     <div>
@@ -40,7 +40,7 @@
         </div>
 
         {{-- Tarjeta 3 --}}
-        <div class="col-md-3 mb-3 mb-md-0">
+        <div class="col-6 col-md-3 mb-3 mb-md-0">
             <div class="card border-0 shadow-sm rounded-4 h-100">
                 <div class="card-body d-flex justify-content-between align-items-center">
                     <div>
@@ -53,7 +53,7 @@
         </div>
 
         {{-- Tarjeta 4 --}}
-        <div class="col-md-3">
+        <div class="col-6 col-md-3">
             <div class="card border-0 shadow-sm rounded-4 h-100">
                 <div class="card-body d-flex justify-content-between align-items-center">
                     <div>
@@ -165,4 +165,103 @@
             </div>
         </div>
     </div>
+
+    {{-- Gráfico de torta: Categorías más vendidas --}}
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div>
+                            <h5 class="fw-bold mb-0">Categorías más vendidas</h5>
+                            <small class="text-muted">Distribución de unidades vendidas por categoría</small>
+                        </div>
+                    </div>
+
+                    @if ($categoriasMasVendidas->sum('total_vendido') > 0)
+                        <div class="row align-items-center">
+                            {{-- Gráfico --}}
+                            <div class="col-md-5 d-flex justify-content-center">
+                                <div style="position: relative; width: 280px; height: 280px;">
+                                    <canvas id="graficoCategorias"></canvas>
+                                </div>
+                            </div>
+                            {{-- Leyenda --}}
+                            <div class="col-md-7 mt-4 mt-md-0">
+                                <div class="row g-3">
+                                    @php
+                                        $colores = ['#4e79a7','#f28e2b','#e15759','#76b7b2','#59a14f','#edc948','#b07aa1','#ff9da7','#9c755f','#bab0ac'];
+                                        $totalVendido = $categoriasMasVendidas->sum('total_vendido');
+                                    @endphp
+                                    @foreach ($categoriasMasVendidas as $i => $cat)
+                                        @if ($cat->total_vendido > 0)
+                                            @php $pct = $totalVendido > 0 ? round($cat->total_vendido / $totalVendido * 100, 1) : 0; @endphp
+                                            <div class="col-sm-6">
+                                                <div class="d-flex align-items-center gap-3 bg-light rounded-3 p-3">
+                                                    <div class="flex-shrink-0 rounded-circle"
+                                                        style="width:16px;height:16px;background-color:{{ $colores[$i % count($colores)] }};"></div>
+                                                    <div class="flex-grow-1 min-w-0">
+                                                        <div class="fw-bold text-dark text-truncate">{{ $cat->name }}</div>
+                                                        <small class="text-muted">{{ $cat->total_vendido }} unid. &mdash; {{ $pct }}%</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @endif
+                                    @endforeach
+                                </div>
+                            </div>
+                        </div>
+                    @else
+                        <div class="text-center py-5 text-muted">
+                            Aún no hay ventas registradas para mostrar el gráfico.
+                        </div>
+                    @endif
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
+
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+    @if ($categoriasMasVendidas->sum('total_vendido') > 0)
+    (function () {
+        const labels  = @json($categoriasMasVendidas->where('total_vendido', '>', 0)->pluck('name')->values());
+        const data    = @json($categoriasMasVendidas->where('total_vendido', '>', 0)->pluck('total_vendido')->values());
+        const colores = ['#4e79a7','#f28e2b','#e15759','#76b7b2','#59a14f','#edc948','#b07aa1','#ff9da7','#9c755f','#bab0ac'];
+
+        new Chart(document.getElementById('graficoCategorias'), {
+            type: 'doughnut',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: data,
+                    backgroundColor: colores.slice(0, labels.length),
+                    borderWidth: 2,
+                    borderColor: '#fff',
+                    hoverOffset: 8,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '60%',
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function(ctx) {
+                                const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+                                const pct   = total > 0 ? ((ctx.parsed / total) * 100).toFixed(1) : 0;
+                                return ` ${ctx.parsed} unid. (${pct}%)`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    })();
+    @endif
+</script>
+@endpush

@@ -42,7 +42,7 @@
 
             <div class="row">
                 @forelse ($categorias as $categoria)
-                    <div class="col-md-4 mb-3">
+                    <div class="col-12 col-sm-6 col-md-4 mb-3">
                         <div class="card border shadow-sm rounded-4 h-100">
                             <div class="card-body p-4">
                                 <div class="d-flex justify-content-between align-items-center mb-4">

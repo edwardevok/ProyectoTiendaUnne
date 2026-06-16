@@ -17,7 +17,10 @@ use App\Http\Controllers\DashboardController;
 Route::get('/', function () {
     return redirect('/index');
 });
-Route::get('/index', function () { return view('index'); });
+Route::get('/index', function () {
+    $destacados = \App\Models\Product::masVendidos(5);
+    return view('index', compact('destacados'));
+});
 Route::get('/quienes-somos', function () { return view('quienes_somos'); });
 Route::get('/comercializacion', function () { return view('comercializacion'); });
 Route::get('/terminos', function () { return view('terminos'); });

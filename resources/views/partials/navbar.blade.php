@@ -57,12 +57,11 @@
                             $totalUnidades = array_sum(array_column(session('cart', []), 'quantity'));
                         @endphp
 
-                        @if ($totalUnidades > 0)
-                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                                {{ $totalUnidades }}
-                                <span class="visually-hidden">productos en el carrito</span>
-                            </span>
-                        @endif
+                        <span id="cart-badge"
+                            class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger {{ $totalUnidades === 0 ? 'd-none' : '' }}">
+                            {{ $totalUnidades ?: '' }}
+                            <span class="visually-hidden">productos en el carrito</span>
+                        </span>
                     </a>
 
                     {{-- Saludo apuntando al Perfil y botón de Salir --}}

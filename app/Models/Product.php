@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use App\Models\OrderItem; // Importamos el modelo de los detalles del pedido
+use Illuminate\Support\Facades\DB;
 
 class Product extends Model
 {
@@ -21,14 +21,66 @@ class Product extends Model
         'is_active',
     ];
 
+    // ========== RELACIONES ==========
+
     public function category()
     {
         return $this->belongsTo(Category::class);
     }
 
-    // NUEVO: Relación para conectar el producto con su historial de ventas
     public function items()
     {
         return $this->hasMany(OrderItem::class);
+    }
+
+    // ========== SCOPES ==========
+
+    public function scopeActivos($query)
+    {
+        return $query->where('is_active', 1);
+    }
+
+    // ========== LÓGICA DE NEGOCIO ==========
+
+    public function desactivar(): void
+    {
+        $this->is_active = 0;
+        $this->save();
+        $this->delete();
+    }
+
+    public function restaurar(): void
+    {
+        $this->restore();
+        $this->is_active = 1;
+        $this->save();
+    }
+
+    // Filtra el carrito eliminando productos que ya no existen o están inactivos.
+    // Devuelve el carrito limpio sin los productos removidos.
+    public static function filtrarCarrito(array $cart): array
+    {
+        if (empty($cart)) {
+            return $cart;
+        }
+
+        $idsActivos = self::whereIn('id', array_keys($cart))
+            ->where('is_active', 1)
+            ->pluck('id')
+            ->toArray();
+
+        return array_filter($cart, fn($id) => in_array($id, $idsActivos), ARRAY_FILTER_USE_KEY);
+    }
+
+    // Top N productos más vendidos según la suma de unidades en order_items.
+    // withSum agrega items_sum_quantity a cada modelo; MySQL pone NULLs al final en DESC.
+    public static function masVendidos(int $limite = 5)
+    {
+        return self::withSum('items', 'quantity')
+            ->activos()
+            ->where('stock', '>', 0)
+            ->orderByDesc('items_sum_quantity')
+            ->take($limite)
+            ->get();
     }
 }

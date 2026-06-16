@@ -24,8 +24,7 @@
                     class="d-flex flex-wrap flex-lg-nowrap align-items-center gap-2 m-0 flex-grow-1">
 
                     {{-- Buscador con botón --}}
-                    <div class="input-group shadow-sm flex-grow-1"
-                        style="min-width: 220px; max-width: 300px; border-radius: 8px; overflow: hidden;">
+                    <div class="input-group shadow-sm flex-grow-1 rounded-3 overflow-hidden">
                         <input type="text" name="search" class="form-control border-0" placeholder="Buscar producto..."
                             value="{{ request('search') }}">
                         <button class="btn btn-primary" type="submit" style="background-color: #0d6efd;">Buscar</button>
@@ -59,8 +58,16 @@
                         <option value="asc" {{ request('sort_stock') == 'asc' ? 'selected' : '' }}>Menor Stock</option>
                     </select>
 
+                    {{-- Desplegable 3: Ventas --}}
+                    <select name="sort_ventas" class="form-select border shadow-sm w-auto flex-shrink-0"
+                        style="border-radius: 8px;" onchange="this.form.submit()">
+                        <option value="">Filtrar Ventas...</option>
+                        <option value="desc" {{ request('sort_ventas') == 'desc' ? 'selected' : '' }}>Más vendidos</option>
+                        <option value="asc" {{ request('sort_ventas') == 'asc' ? 'selected' : '' }}>Menos vendidos</option>
+                    </select>
+
                     {{-- Botón para limpiar filtros --}}
-                    @if (request('search') || request('category_id') || request('sort_price') || request('sort_stock'))
+                    @if (request('search') || request('category_id') || request('sort_price') || request('sort_stock') || request('sort_ventas'))
                         <a href="/admin/productos" class="btn btn-light border shadow-sm fw-bold flex-shrink-0"
                             style="border-radius: 8px;">Limpiar</a>
                     @endif
