@@ -106,7 +106,7 @@
                     style="background-image: url('{{ asset('img/libreria.png') }}');">
                     <div class="categoria-overlay">
                         <span class="material-symbols-rounded mb-2">ink_pen</span>
-                        <h3 class="categoria-titulo">Útiles</h3>
+                        <h3 class="categoria-titulo">Librería</h3>
                     </div>
                 </a>
             </div>
@@ -116,7 +116,7 @@
                     style="background-image: url('{{ asset('img/hogar.png') }}');">
                     <div class="categoria-overlay">
                         <span class="material-symbols-rounded mb-2">water_bottle</span>
-                        <h3 class="categoria-titulo">Bazar</h3>
+                        <h3 class="categoria-titulo">Hogar</h3>
                     </div>
                 </a>
             </div>

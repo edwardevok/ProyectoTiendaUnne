@@ -9,8 +9,9 @@ class CategoryController extends Controller
 {
     public function index()
     {
-        $categorias = Category::all();
-        return view('admin.categorias', compact('categorias'));
+        $categorias          = Category::all();
+        $categoriasEliminadas = Category::onlyTrashed()->get();
+        return view('admin.categorias', compact('categorias', 'categoriasEliminadas'));
     }
 
     public function store(Request $request)
@@ -26,7 +27,7 @@ class CategoryController extends Controller
     public function update(Request $request, $id)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
+            'name' => 'required|string|max:255|unique:categories,name,' . $id,
         ]);
 
         $categoria = Category::findOrFail($id);
@@ -44,5 +45,12 @@ class CategoryController extends Controller
 
         $categoria->delete();
         return redirect('/admin/categorias')->with('success', 'Categoría eliminada correctamente.');
+    }
+
+    public function restore($id)
+    {
+        $categoria = Category::onlyTrashed()->findOrFail($id);
+        $categoria->restore();
+        return redirect('/admin/categorias')->with('success', 'Categoría "' . $categoria->name . '" restaurada correctamente.');
     }
 }

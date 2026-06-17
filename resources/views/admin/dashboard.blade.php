@@ -140,7 +140,7 @@
                             <div>
                                 <strong class="d-block text-dark text-truncate"
                                     style="max-width: 170px;">{{ $producto->name }}</strong>
-                                <small class="text-muted">Ranking #{{ $index + 1 }} ({{ $producto->total_vendido }}
+                                <small class="text-muted">Ranking #{{ $index + 1 }} ({{ $producto->items_sum_quantity ?? 0 }}
                                     unid.)</small>
                             </div>
                             <span class="fs-4">

@@ -51,6 +51,7 @@ Route::middleware(['auth'])->group(function () {
     // Rutas del Carrito de Compras
     Route::get('/carrito', [CartController::class, 'index']);
     Route::post('/carrito/agregar/{id}', [CartController::class, 'add']);
+    Route::patch('/carrito/actualizar/{id}', [CartController::class, 'update']);
     Route::delete('/carrito/quitar/{id}', [CartController::class, 'remove']);
     Route::post('/carrito/vaciar', [CartController::class, 'clear']);
     
@@ -98,6 +99,7 @@ Route::middleware(['auth', \App\Http\Middleware\IsAdmin::class])->group(function
     Route::post('/admin/categorias', [CategoryController::class, 'store']);
     Route::put('/admin/categorias/{id}', [CategoryController::class, 'update']);
     Route::delete('/admin/categorias/{id}', [CategoryController::class, 'destroy']);
+    Route::put('/admin/categorias/{id}/restaurar', [CategoryController::class, 'restore']);
 
     // Consultas
     Route::get('/admin/consultas', [MessageController::class, 'index']);

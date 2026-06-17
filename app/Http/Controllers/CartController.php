@@ -82,6 +82,35 @@ class CartController extends Controller
         return redirect()->back()->with('success', $mensaje);
     }
 
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'quantity' => 'required|integer|min:1|max:99',
+        ]);
+
+        $producto = Product::findOrFail($id);
+        $cart     = session()->get('cart', []);
+
+        if (!isset($cart[$id])) {
+            return redirect()->back()->with('error', 'El producto no está en el carrito.');
+        }
+
+        $nuevaCantidad = (int) $request->quantity;
+
+        if ($nuevaCantidad > $producto->stock) {
+            $mensaje = $producto->stock === 0
+                ? 'Lo sentimos, este producto se encuentra agotado.'
+                : "No hay suficiente stock. Solo hay {$producto->stock} unidad(es) disponibles.";
+            return redirect()->back()->with('error', $mensaje);
+        }
+
+        $cart[$id]['quantity'] = $nuevaCantidad;
+        session()->put('cart', $cart);
+        $this->guardarEnBD($cart);
+
+        return redirect()->back();
+    }
+
     public function remove($id)
     {
         $cart = session()->get('cart', []);

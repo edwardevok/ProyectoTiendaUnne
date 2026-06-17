@@ -73,14 +73,19 @@ class Product extends Model
     }
 
     // Top N productos más vendidos según la suma de unidades en order_items.
-    // withSum agrega items_sum_quantity a cada modelo; MySQL pone NULLs al final en DESC.
-    public static function masVendidos(int $limite = 5)
+    // $soloConStock=true para el carrusel del index (excluye agotados).
+    // $soloConStock=false para el dashboard (muestra vendidos aunque estén sin stock).
+    public static function masVendidos(int $limite = 5, bool $soloConStock = true)
     {
-        return self::withSum('items', 'quantity')
+        $query = self::withSum('items', 'quantity')
             ->activos()
-            ->where('stock', '>', 0)
             ->orderByDesc('items_sum_quantity')
-            ->take($limite)
-            ->get();
+            ->take($limite);
+
+        if ($soloConStock) {
+            $query->where('stock', '>', 0);
+        }
+
+        return $query->get();
     }
 }

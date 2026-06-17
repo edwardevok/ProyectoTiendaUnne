@@ -127,20 +127,29 @@
                                             <div class="d-flex w-100 justify-content-between align-items-center pe-3">
                                                 <div>
                                                     <span class="fw-bold text-dark">Pedido #{{ $pedido->id }}</span>
-                                                    <small
-                                                        class="text-muted d-block">{{ $pedido->created_at->format('d/m/Y') }}</small>
+                                                    <small class="text-muted d-block">{{ $pedido->created_at->format('d/m/Y') }}</small>
+                                                    @if ($pedido->delivery_type === 'domicilio')
+                                                        <small class="text-info d-block"><i class="bi bi-truck"></i> Envío a domicilio</small>
+                                                    @else
+                                                        <small class="text-secondary d-block"><i class="bi bi-geo-alt"></i> Retiro en campus</small>
+                                                    @endif
                                                 </div>
-                                                <span
-                                                    class="badge bg-primary bg-opacity-10 text-primary">{{ strtoupper($pedido->status) }}</span>
+                                                <span class="badge bg-primary bg-opacity-10 text-primary">{{ strtoupper($pedido->status) }}</span>
                                             </div>
                                         </button>
                                         <div id="col{{ $pedido->id }}" class="accordion-collapse collapse"
                                             data-bs-parent="#accordionPedidos">
                                             <div class="accordion-body bg-light rounded mt-2">
                                                 @foreach ($pedido->items as $item)
-                                                    <p class="mb-0">{{ $item->quantity }}x
-                                                        {{ $item->product->name ?? 'Producto' }}</p>
+                                                    <div class="d-flex justify-content-between small mb-1">
+                                                        <span>{{ $item->quantity }}x {{ $item->product->name ?? 'Producto' }}</span>
+                                                        <span class="text-muted">$ {{ number_format($item->price * $item->quantity, 2, ',', '.') }}</span>
+                                                    </div>
                                                 @endforeach
+                                                <div class="d-flex justify-content-between fw-bold border-top pt-2 mt-1">
+                                                    <span>Total</span>
+                                                    <span>$ {{ number_format($pedido->total, 2, ',', '.') }}</span>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>

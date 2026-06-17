@@ -45,6 +45,14 @@
             </div>
         @endif
 
+        {{-- Mensaje de error (ej: stock insuficiente al confirmar pedido) --}}
+        @if (session('error'))
+            <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ session('error') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
+
         {{-- Comprobamos si hay productos en el carrito --}}
         @if (count($cart) > 0)
             <div class="row g-4">
@@ -85,7 +93,18 @@
                                                 </td>
                                                 <td class="py-3 fw-bold text-secondary">$
                                                     {{ number_format($details['price'], 0, ',', '.') }}</td>
-                                                <td class="py-3 fw-bold">{{ $details['quantity'] }}</td>
+                                                <td class="py-3">
+                                                    <form action="/carrito/actualizar/{{ $id }}" method="POST" class="m-0">
+                                                        @csrf
+                                                        @method('PATCH')
+                                                        <div class="d-flex align-items-center justify-content-center gap-1">
+                                                            <button type="button" class="btn btn-sm btn-outline-secondary px-2 qty-btn" data-action="dec">−</button>
+                                                            <input type="number" name="quantity" value="{{ $details['quantity'] }}" min="1" max="99"
+                                                                class="form-control form-control-sm text-center fw-bold qty-input" style="width: 52px;">
+                                                            <button type="button" class="btn btn-sm btn-outline-secondary px-2 qty-btn" data-action="inc">+</button>
+                                                        </div>
+                                                    </form>
+                                                </td>
                                                 <td class="py-3 fw-bold text-primary">$
                                                     {{ number_format($details['price'] * $details['quantity'], 0, ',', '.') }}
                                                 </td>
@@ -169,6 +188,19 @@
     @include('partials.footer')
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.querySelectorAll('.qty-btn').forEach(btn => {
+            btn.addEventListener('click', function () {
+                const form = this.closest('form');
+                const input = form.querySelector('.qty-input');
+                let val = parseInt(input.value);
+                if (this.dataset.action === 'inc') val++;
+                if (this.dataset.action === 'dec' && val > 1) val--;
+                input.value = val;
+                form.submit();
+            });
+        });
+    </script>
 </body>
 
 </html>

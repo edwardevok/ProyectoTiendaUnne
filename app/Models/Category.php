@@ -4,11 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\DB;
 
 class Category extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = ['name'];
 
@@ -34,6 +35,7 @@ class Category extends Model
             ->leftJoin('products', 'categories.id', '=', 'products.category_id')
             ->leftJoin('order_items', 'products.id', '=', 'order_items.product_id')
             ->select('categories.name', DB::raw('COALESCE(SUM(order_items.quantity), 0) as total_vendido'))
+            ->whereNull('categories.deleted_at')
             ->groupBy('categories.id', 'categories.name')
             ->orderByDesc('total_vendido')
             ->get();

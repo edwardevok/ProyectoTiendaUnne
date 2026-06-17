@@ -117,6 +117,39 @@
         </div>
     </div>
 
+    {{-- Sección de Categorías Eliminadas --}}
+    @if ($categoriasEliminadas->isNotEmpty())
+        <div class="card border-0 shadow-sm rounded-4 mt-4">
+            <div class="card-body p-4">
+                <h5 class="fw-bold mb-4 text-danger">Categorías eliminadas</h5>
+                <div class="row">
+                    @foreach ($categoriasEliminadas as $categoria)
+                        <div class="col-12 col-sm-6 col-md-4 mb-3">
+                            <div class="card border border-danger border-opacity-25 shadow-sm rounded-4 h-100 opacity-75">
+                                <div class="card-body p-4">
+                                    <div class="d-flex justify-content-between align-items-center mb-4">
+                                        <strong class="text-muted fs-5">{{ $categoria->name }}</strong>
+                                        <span class="badge bg-danger bg-opacity-10 text-danger border border-danger-subtle px-3 py-2 rounded-pill">
+                                            Eliminada
+                                        </span>
+                                    </div>
+                                    <form action="/admin/categorias/{{ $categoria->id }}/restaurar" method="POST">
+                                        @csrf
+                                        @method('PUT')
+                                        <button type="submit" class="btn w-100 text-success bg-success bg-opacity-10 fw-bold"
+                                            style="border-radius: 8px;">
+                                            Restaurar
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+    @endif
+
     {{-- Ventana Emergente (Modal) para Nueva Categoría (AFUERA DEL BUCLE) --}}
     <div class="modal fade" id="modalNuevaCategoria" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">

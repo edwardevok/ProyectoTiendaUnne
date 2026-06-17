@@ -260,7 +260,7 @@
                         </div>
 
                         <h4 class="fw-bold mb-2" style="color: #021A54;">
-                            ¡Pedido #{{ session('pedido_exitoso') }} confirmado!
+                            ¡Pedido confirmado!
                         </h4>
                         <p class="text-muted mb-0">
                             Tu pedido está <strong>en preparación</strong>.<br>

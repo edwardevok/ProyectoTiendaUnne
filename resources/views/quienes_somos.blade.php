@@ -114,7 +114,7 @@
     </section>
 
     {{-- Transición Curva SVG --}}
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"
+    <svg class="svg-ola" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"
         style="display: block; width: 100%; height: auto; background-color: #f8f9fa;">
         <path fill="#263B6A" fill-opacity="1"
             d="M0,96L60,128C120,160,240,224,360,213.3C480,203,600,117,720,112C840,107,960,181,1080,208C1200,235,1320,213,1380,202.7L1440,192L1440,320L1380,320C1320,320,1200,320,1080,320C960,320,840,320,720,320C600,320,480,320,360,320C240,320,120,320,60,320L0,320Z">

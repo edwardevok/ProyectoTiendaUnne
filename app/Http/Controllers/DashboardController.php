@@ -16,7 +16,7 @@ class DashboardController extends Controller
         $usuariosRegistrados    = User::count();
         $pedidosEntregados      = Order::entregados()->count();
         $ultimosPedidos         = Order::ultimos(5);
-        $topProductos           = Product::masVendidos(5);
+        $topProductos           = Product::masVendidos(5, false);
         $categoriasMasVendidas  = Category::masVendidas();
 
         return view('admin.dashboard', compact(
