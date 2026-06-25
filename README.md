@@ -1,58 +1,133 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 🛒 Tienda UNNE
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Tienda online de merchandising de la Universidad Nacional del Nordeste (UNNE), desarrollada como proyecto académico con **Laravel 13**.
 
-## About Laravel
+La aplicación incluye un catálogo público de productos organizados por categorías, carrito de compras, gestión de pedidos y un **panel de administración** completo para administrar productos, categorías, usuarios, pedidos y consultas.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+---
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## ✨ Características
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- **Catálogo público** con productos por categoría (Indumentaria, Accesorios, Librería, Bazar).
+- **Carrito de compras** y registro de pedidos (retiro en campus o envío a domicilio).
+- **Autenticación de usuarios** (clientes y administradores).
+- **Panel de administración** (`/admin`) protegido por rol, con ABM de:
+  - Productos
+  - Categorías
+  - Usuarios
+  - Pedidos
+  - Consultas/mensajes del público
 
-## Learning Laravel
+## 🧰 Tecnologías
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+- **Backend:** PHP 8.3+ / Laravel 13
+- **Frontend:** Blade + Vite
+- **Base de datos:** SQLite (no requiere instalar ningún servidor de base de datos)
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+---
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+## 🚀 Instalación y puesta en marcha
 
-## Agentic Development
+> El proyecto viene preparado para usar **SQLite**, por lo que **no necesitás instalar MySQL ni MariaDB**. SQLite ya viene incluido con PHP.
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+### Requisitos previos
 
-```bash
-composer require laravel/boost --dev
+- **PHP 8.3 o superior** (con la extensión `pdo_sqlite`, habilitada por defecto)
+- **Composer**
+- **Node.js + npm**
 
-php artisan boost:install
-```
+> 💡 La forma más sencilla de tener PHP listo en Windows/Mac es instalar [Laravel Herd](https://herd.laravel.com/), que incluye PHP y Composer.
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+### Pasos
 
-## Contributing
+1. **Clonar el repositorio**
+   ```bash
+   git clone <URL-DEL-REPOSITORIO>
+   cd tienda_unne
+   ```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+2. **Instalar dependencias de PHP**
+   ```bash
+   composer install
+   ```
 
-## Code of Conduct
+3. **Instalar dependencias de frontend y compilar**
+   ```bash
+   npm install
+   npm run build
+   ```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+4. **Crear el archivo de configuración** (copiar la plantilla)
+   - En **Windows (CMD/PowerShell)**:
+     ```bash
+     copy .env.example .env
+     ```
+   - En **Mac/Linux**:
+     ```bash
+     cp .env.example .env
+     ```
 
-## Security Vulnerabilities
+5. **Generar la clave de la aplicación**
+   ```bash
+   php artisan key:generate
+   ```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+6. **Crear el archivo de base de datos SQLite (vacío)**
+   - En **Windows (CMD/PowerShell)**:
+     ```bash
+     type nul > database\database.sqlite
+     ```
+   - En **Mac/Linux**:
+     ```bash
+     touch database/database.sqlite
+     ```
 
-## License
+7. **Crear las tablas y cargar los datos** (productos, categorías y usuario admin)
+   ```bash
+   php artisan migrate --seed
+   ```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+8. **Levantar el servidor**
+   ```bash
+   php artisan serve
+   ```
+   Luego abrir en el navegador: **http://localhost:8000**
+
+   > Si usás **Laravel Herd**, el sitio queda disponible automáticamente en `http://tienda_unne.test` y podés saltear este paso.
+
+---
+
+## 🔑 Acceso al Panel de Administración
+
+Una vez instalado, ya existe un usuario administrador cargado automáticamente:
+
+| Campo | Valor |
+|-------|-------|
+| **URL de ingreso** | http://localhost:8000/login |
+| **Correo** | `admin@tienda.com` |
+| **Contraseña** | `admin1234` |
+
+Al iniciar sesión con estas credenciales serás redirigido automáticamente al panel: **http://localhost:8000/admin/dashboard**
+
+> El panel está protegido: solo los usuarios con rol `admin` pueden acceder. Los visitantes pueden registrarse y comprar como clientes.
+
+---
+
+## 📦 Datos incluidos
+
+Al ejecutar `php artisan migrate --seed` se cargan automáticamente:
+
+- **4 categorías:** Indumentaria, Accesorios, Librería y Bazar.
+- **36 productos** con sus precios, stock, descripciones e **imágenes** (las imágenes ya vienen incluidas en el repositorio, en `public/img/`).
+- **1 usuario administrador** (ver credenciales arriba).
+
+Esto significa que, apenas instalado, el sitio ya se ve con el catálogo completo y listo para usar.
+
+---
+
+## ❓ Problemas frecuentes
+
+- **"could not find driver" al migrar:** asegurate de tener habilitada la extensión `pdo_sqlite` en tu PHP (en Herd ya viene activa).
+- **No aparecen estilos:** ejecutá `npm run build` (paso 3).
+- **Las imágenes no se ven:** verificá que el paso de `migrate --seed` se haya ejecutado sin errores; las imágenes se referencian desde `public/img/`.
+- **Empezar de cero:** para borrar todo y recargar los datos, ejecutá `php artisan migrate:fresh --seed`.

@@ -16,8 +16,8 @@ class CategoriaSeeder extends Seeder
     $categorias = [
         'Indumentaria',
         'Accesorios',
-        'Librería y Estudio',
-        'Hogar y Utilidad'
+        'Librería',
+        'Bazar'
     ];
 
     foreach ($categorias as $cat) {
